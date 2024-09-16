@@ -13,10 +13,15 @@
  ```
 
 ## Building
- After resolving the dependencies, simply run the makefile :
+ After resolving the dependencies, simply run the Makefile :
  ```bash
  make all -s
  ```
 
 ## Running
  To run it, you can write the disk image to an usb key and boot it on a real computer or just run it in a virtual machine
+
+ To run it using Qemu, you can use the "run" target of the Makefile directly:
+ ```bash
+ make run -s
+ ```
