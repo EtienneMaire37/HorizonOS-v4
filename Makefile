@@ -22,6 +22,7 @@ horizonos.iso: src/kernel/kernelentry.asm Makefile rmBin
 	$(ASM) -f elf -o "bin/kernelentry.o" "src/kernel/kernelentry.asm"
 	$(ASM) -f elf -o "bin/gdt.o" "src/kernel/GDT/gdt.asm"
 	$(ASM) -f elf -o "bin/idt.o" "src/kernel/IDT/idt.asm"
+	$(ASM) -f elf -o "bin/paging.o" "src/kernel/paging/paging.asm"
 	 
 	$(CC) -c "src/kernel/kmain.c" -o "bin/kmain.o" $(CFLAGS)
 	 

@@ -45,6 +45,7 @@ void Halt();
 #include "klibc/stdlib.h"
 #include "klibc/string.h"
 
+#include "paging/paging.h"
 #include "multitasking/task.h"
 
 // ---------------------------------------------------------------
@@ -157,18 +158,29 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     //     kprintf("\rTime: %u.%u%u%u", globalTimer / 1000, (globalTimer / 100) % 10,  (globalTimer / 10) % 10, globalTimer % 10);
     // }
 
-    void A()
-    {
-        while(true) *(char*)(0xb8000) = 'A';
-    }
+    // void A()
+    // {
+    //     while(true) *(char*)(0xb8000) = 'A';
+    // }
 
-    void B()
-    {
-        while(true) *(char*)(0xb8000) = 'B';
-    }
+    // void B()
+    // {
+    //     while(true) *(char*)(0xb8000) = 'B';
+    // }
 
-    struct Task taskA = CreateTask("Task A", (uint32_t)&A), taskB = CreateTask("Task B", (uint32_t)&B);
-    InitMultitasking(&taskA);
-    AddTask(&taskB);
-    EnableMultitasking();
+    // struct Task taskA = CreateTask("Task A", (uint32_t)&A), taskB = CreateTask("Task B", (uint32_t)&B);
+    // InitMultitasking(&taskA);
+    // AddTask(&taskB);
+    // EnableMultitasking();
+
+    InitPageDirectory();
+
+    AddPageTable(0, &page_table_0[0], PAGING_SUPERVISOR_LEVEL, true);
+    for (uint16_t i = 0; i < 256; i++)
+        SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+
+    LoadPageDirectory(&page_directory[0]);
+    // EnablePaging();
+
+    while(true);
 }
