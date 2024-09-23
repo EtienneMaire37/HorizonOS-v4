@@ -1,0 +1,7 @@
+megs: 256
+display_library: sdl2
+ata0-master: type=cdrom, path="horizonos.iso", cylinders=615, heads=6, spt=17
+boot: cdrom
+log: bochsout.txt
+mouse: enabled=0
+sound: waveoutdrv=sdl, waveindrv=sdl

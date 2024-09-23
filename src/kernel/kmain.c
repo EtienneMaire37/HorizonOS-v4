@@ -15,6 +15,7 @@ multiboot_info_t* multibootInfo;
 
 extern uint8_t _kernelStart;
 extern uint8_t _kernelEnd;
+uint32_t kernelSize;
 
 uint32_t availableMem = 0;
 
@@ -71,6 +72,8 @@ void Halt()
     _halt();
 }
 
+uint32_t page_table_0[1024] __attribute__((aligned(4096)));
+
 void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 {
     textColor = FG_WHITE | BG_BLACK;
@@ -82,10 +85,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     multibootInfo = _multibootInfo;
 
+    kernelSize = &_kernelEnd - &_kernelStart;
+
     ClearScreen(' ');
     ResetCursor();
 
-    LOG("INFO", "Kernel loaded"); 
+    LOG("INFO", "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
 
     kprintf("Detecting available memory...");
 
@@ -150,13 +155,24 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Initialized the keyboard"); 
 
+    LOG("INFO", "Setting up paging"); 
+
+    InitPageDirectory();
+
+    for (uint16_t i = 0; i < 256; i++)                                          // First megabyte
+        SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+    for (uint16_t i = 256; i < 1024; i++)                                       // First 4 megabytes
+        SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+
+    AddPageTable(0, &page_table_0[0], PAGING_SUPERVISOR_LEVEL, true);
+
+    LoadPageDirectory((uint32_t)&page_directory[0]);
+    EnablePaging();
+
     EnableInterrupts(); 
     LOG("INFO", "Enabled interrupts"); 
 
-    // while(true)
-    // {
-    //     kprintf("\rTime: %u.%u%u%u", globalTimer / 1000, (globalTimer / 100) % 10,  (globalTimer / 10) % 10, globalTimer % 10);
-    // }
+    while(true);
 
     // void A()
     // {
@@ -172,15 +188,4 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     // InitMultitasking(&taskA);
     // AddTask(&taskB);
     // EnableMultitasking();
-
-    InitPageDirectory();
-
-    AddPageTable(0, &page_table_0[0], PAGING_SUPERVISOR_LEVEL, true);
-    for (uint16_t i = 0; i < 256; i++)
-        SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
-
-    LoadPageDirectory(&page_directory[0]);
-    // EnablePaging();
-
-    while(true);
 }

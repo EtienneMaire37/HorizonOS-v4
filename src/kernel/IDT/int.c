@@ -24,7 +24,6 @@ void InterruptHandler(struct IntRegisters params)
 {
     if(params.interruptNumber < 32)            // ISR
     {
-        // LOG("INFO", "Interrupt %u handled", params.interruptNumber);
         kernelPanic(params.interruptNumber, params.errorCode);
         return;
     }

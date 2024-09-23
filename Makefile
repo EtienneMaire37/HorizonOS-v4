@@ -1,6 +1,6 @@
 CC := i386-elf-gcc
 ASM := nasm
-CFLAGS := -std=gnu99 -nostdlib -lgcc -ffreestanding -Wall -masm=intel -m32 # -O3
+CFLAGS := -std=gnu99 -nostdlib -ffreestanding -Wall -masm=intel -m32 # -O3 -lgcc
 DATE := `date +"%Y-%m-%d"`
 
 all: horizonos.iso
@@ -19,18 +19,18 @@ run: horizonos.iso
 
 horizonos.iso: src/kernel/kernelentry.asm Makefile rmBin
 	 
-	$(ASM) -f elf -o "bin/kernelentry.o" "src/kernel/kernelentry.asm"
-	$(ASM) -f elf -o "bin/gdt.o" "src/kernel/GDT/gdt.asm"
-	$(ASM) -f elf -o "bin/idt.o" "src/kernel/IDT/idt.asm"
-	$(ASM) -f elf -o "bin/paging.o" "src/kernel/paging/paging.asm"
+	$(ASM) -f elf32 -o "bin/kernelentry.o" "src/kernel/kernelentry.asm"
+	$(ASM) -f elf32 -o "bin/gdt.o" "src/kernel/GDT/gdt.asm"
+	$(ASM) -f elf32 -o "bin/idt.o" "src/kernel/IDT/idt.asm"
+	$(ASM) -f elf32 -o "bin/paging.o" "src/kernel/paging/paging.asm"
 	 
 	$(CC) -c "src/kernel/kmain.c" -o "bin/kmain.o" $(CFLAGS)
 	 
-	ld -m elf_i386 -T src/link.ld -o "bin/kernel.bin"
+	ld -T src/link.ld -m elf_i386 
 	 
 	mkdir -p root/boot/grub
-	 
-	cp bin/kernel.bin root/boot/kernel.bin
+	
+	cp bin/kernel.elf root/boot/kernel.elf
 	cp src/grub.cfg root/boot/grub/grub.cfg
 	 
 	grub-mkrescue -o horizonos.iso root

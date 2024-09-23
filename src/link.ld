@@ -8,33 +8,34 @@ INPUT
 	"bin/idt.o"
 	"bin/paging.o"
 )
+
+OUTPUT_FORMAT(elf32-i386)
+OUTPUT("bin/kernel.elf")
  
 SECTIONS
 {
 	. = 0x100000;
-	_kernelStart = .;
  
-	.text BLOCK(4K) : ALIGN(4K)
+	.text : ALIGN(0x1000)
 	{
+		_kernelStart = .;
 		*(.multiboot)
 		*(.text)
 	}
  
-	.rodata BLOCK(4K) : ALIGN(4K)
+	.rodata : ALIGN(0x1000)
 	{
 		*(.rodata)
 	}
 
-	.data BLOCK(4K) : ALIGN(4K)
+	.data : ALIGN(0x1000)
 	{
 		*(.data)
 	}
 
-	.bss BLOCK(4K) : ALIGN(4K)
+	.bss : ALIGN(0x1000)
 	{
-		*(COMMON)
 		*(.bss)
+		_kernelEnd = .;
 	}
-
-	_kernelEnd = .;
 }

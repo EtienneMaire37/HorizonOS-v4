@@ -1,0 +1,8 @@
+0000-00-00 	 00:00:00,000 	 INFO 	Kernel loaded at address 0x100000 - 0x11a000 (106496 bytes long)
+0000-00-00 	 00:00:00,000 	 INFO 	Detected 133692416 bytes of usable memory
+0000-00-00 	 00:00:00,000 	 INFO 	Loaded the GDT
+0000-00-00 	 00:00:00,000 	 INFO 	Loaded the IDT
+0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIC
+0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIT
+0000-00-00 	 00:00:00,000 	 INFO 	Initialized the keyboard
+0000-00-00 	 00:00:00,000 	 INFO 	Setting up paging (identity paging 0x00000000-0x3fffff)

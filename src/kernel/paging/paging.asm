@@ -1,4 +1,5 @@
 bits 32
+section .text
 
 global LoadPageDirectory
 LoadPageDirectory:
@@ -14,13 +15,7 @@ LoadPageDirectory:
 
 global EnablePaging
 EnablePaging:
-    push ebp
-    mov ebp, esp
-
     mov eax, cr0
     or eax, (1 << 31)
     mov cr0, eax
-    
-    mov esp, ebp
-    pop ebp
     ret

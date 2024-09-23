@@ -23,6 +23,9 @@ _start:
 	push eax ; magic number
 	push ebx ; multiboot info
 
+; 	xor eax, eax
+; 	mov cr4, eax
+
 	call kernel
 
 	add esp, 8 ; clean up stack
