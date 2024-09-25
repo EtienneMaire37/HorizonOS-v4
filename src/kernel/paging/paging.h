@@ -64,6 +64,7 @@ void RemovePageTable(uint16_t index)
 void RemovePage(uint32_t* pt, uint16_t index)
 {
     // pt[index].present = 0;
+    // pt[index] &= ~0x00000001;
     pt[index] = 0;
 } 
 
@@ -81,5 +82,8 @@ void SetPage(uint32_t* pt, uint16_t index, uint32_t address, bool user_superviso
     pt[index] = (address & 0xfffff000) | (user_supervisor << 2) | (read_write << 1) | 1;
 } 
 
+#define ReloadPageDirectory() LoadPageDirectory((uint32_t)&page_directory[0])
+
 extern void LoadPageDirectory(uint32_t address);
 extern void EnablePaging(); 
+extern void JumpToHigherHalf();

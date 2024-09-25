@@ -6,29 +6,107 @@ FLAGS equ (ALIGNMENT | MEMINFO)
 MAGIC equ 0x1BADB002
 CHECKSUM equ -(MAGIC + FLAGS)
 
-section .multiboot
+%macro CALL_LOWER_HALF 1
+	mov edx, %1
+    sub edx, 0xc0000000
+	call edx
+%endmacro
+
+%macro DEBUG_A 0
+	mov al, 'A'
+ 	mov ah, 0x0f
+ 	mov [0xb8000], ax
+ 	jmp $
+%endmacro
+
+section .multiboot.data
 dd MAGIC
 dd FLAGS
 dd CHECKSUM
 
-section .text
+section .multiboot.text
 extern kernel
+extern page_directory
+extern page_table_0
+extern page_table_768
 global _start
 _start:
-	mov ebp, stack_top
-	mov esp, stack_top
-
 	cli
 
-	push eax ; magic number
-	push ebx ; multiboot info
+	mov [MAGIC_NUMBER], eax
+	mov [MULTIBOOT_INFO], ebx
 
-; 	xor eax, eax
-; 	mov cr4, eax
+	mov ebp, stack_top
+    sub ebp, 0xc0000000
+	mov esp, stack_top
+    sub esp, 0xc0000000
+
+	xor ebx, ebx
+	mov ecx, 1024
+	.loopPT0:
+		mov edx, 4096
+		mov eax, ebx
+		mul edx
+		or eax, 0b11
+
+		mov [page_table_0 + 4 * ebx - 0xc0000000], eax
+
+		inc ebx
+		loop .loopPT0
+
+	xor ebx, ebx
+	mov ecx, 1024
+	.loopPT768:
+		mov edx, 4096
+		mov eax, ebx
+		mul edx
+		or eax, 0b11
+
+		mov [page_table_768 + 4 * ebx - 0xc0000000], eax
+
+		inc ebx
+		loop .loopPT768
+
+	mov eax, page_table_0
+	sub eax, 0xc0000000
+	and eax, 0xfffff000
+	or eax, 0b11
+
+	mov [page_directory - 0xc0000000], eax
+
+	mov eax, page_table_768
+	sub eax, 0xc0000000
+	and eax, 0xfffff000
+	or eax, 0b11
+
+	mov [page_directory + 4 * 768 - 0xc0000000], eax
+
+	mov ecx, page_directory
+    sub ecx, 0xc0000000
+	mov cr3, ecx
+
+	mov eax, cr0
+    or eax, (1 << 31)
+    mov cr0, eax
+
+	mov ebp, stack_top
+	mov esp, ebp
+
+	mov eax, [MAGIC_NUMBER]
+	push eax ; magic number
+	mov ebx, [MULTIBOOT_INFO]
+	push ebx ; multiboot info
 
 	call kernel
 
-	add esp, 8 ; clean up stack
+	add esp, 8 
+
+	jmp $
+
+MAGIC_NUMBER: dd 0
+MULTIBOOT_INFO: dd 0
+
+section .text
 
 global _halt
 _halt:

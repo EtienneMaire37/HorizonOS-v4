@@ -73,6 +73,7 @@ void Halt()
 }
 
 uint32_t page_table_0[1024] __attribute__((aligned(4096)));
+uint32_t page_table_768[1024] __attribute__((aligned(4096)));
 
 void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 {
@@ -91,6 +92,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     ResetCursor();
 
     LOG("INFO", "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
+
+    if (kernelSize >= 0x400000)
+    {
+        LOG("CRITICAL", "Kernel is too big (max 4MB)"); 
+        kabort();
+    }
 
     kprintf("Detecting available memory...");
 
@@ -155,24 +162,42 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Initialized the keyboard"); 
 
-    LOG("INFO", "Setting up paging"); 
+    // *((uint8_t*)0xb000000) = 0; // PAGE FAULT
 
-    InitPageDirectory();
+    // LOG("INFO", "Setting up paging"); 
 
-    for (uint16_t i = 0; i < 256; i++)                                          // First megabyte
-        SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
-    for (uint16_t i = 256; i < 1024; i++)                                       // First 4 megabytes
-        SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+    // // Map kernel to higher half (0xC0000000)
 
-    AddPageTable(0, &page_table_0[0], PAGING_SUPERVISOR_LEVEL, true);
+    // InitPageDirectory();
 
-    LoadPageDirectory((uint32_t)&page_directory[0]);
-    EnablePaging();
+    // for (uint16_t i = 0; i < 256; i++)                                          // First megabyte
+    //     SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+    // for (uint16_t i = 256; i < 1024; i++)                                       // First 4 megabytes
+    //     SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+
+    // for (uint32_t i = 0; i < 1024; i++)                                         // 0xC0000000 - 0xC03FFFFF
+    //     SetPage(&page_table_768[0], i, i * 4096 + (uint32_t)&_kernelStart, PAGING_SUPERVISOR_LEVEL, true);
+
+    // AddPageTable(0, &page_table_0[0], PAGING_SUPERVISOR_LEVEL, true);
+    // AddPageTable(768, &page_table_768[0], PAGING_SUPERVISOR_LEVEL, true);
+
+    // ReloadPageDirectory();
+    // EnablePaging();
+
+    // while(true);
+
+    // JumpToHigherHalf();
+}
+
+void HigherHalf()
+{
+    for (uint16_t i = 256; i < 1024; i++)                                       // 0x100000 - 0x3fffff
+        RemovePage(&page_table_0[0], i);
+
+    ReloadPageDirectory();
 
     EnableInterrupts(); 
     LOG("INFO", "Enabled interrupts"); 
-
-    while(true);
 
     // void A()
     // {
@@ -188,4 +213,6 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     // InitMultitasking(&taskA);
     // AddTask(&taskB);
     // EnableMultitasking();
+
+    while(true);
 }
