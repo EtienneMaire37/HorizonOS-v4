@@ -16,3 +16,9 @@ LoadGDT:
     mov   ss, ax
  
     ret
+
+global LoadTSS
+LoadTSS:
+	mov ax, (5 * 8) | 0b00
+	ltr ax
+	ret

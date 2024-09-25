@@ -25,7 +25,7 @@ struct Task CreateTask(char* name, uint32_t address)
     kmemcpy(&task.name[0], name, min(63, kstrlen(name)));
     task.name[63] = 0;
 
-    task.registers.cs = CODE_SEGMENT;
+    task.registers.cs = KERNEL_CODE_SEGMENT;
     task.registers.eip = address;
     task.registers.eflags = (1 << 9);  // Interrupt enable
 

@@ -10,8 +10,7 @@ multiboot_info_t* multibootInfo;
 #define GB (1024 * MB)
 #define TB (1024 * GB)
 
-#define CODE_SEGMENT 0x08
-#define DATA_SEGMENT 0x10
+extern uint8_t stack_top;
 
 extern uint8_t _kernelStart;
 extern uint8_t _kernelEnd;
@@ -128,8 +127,15 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     kprintf("Loading a GDT...");
     kmemset(&GDT[0], 0, sizeof(struct GDT_Entry));   // NULL Descriptor
-    SetupGDTEntry(&GDT[1], 0, 0xfffff, 0x9a, 0xc);  // Kernel mode code segment
-    SetupGDTEntry(&GDT[2], 0, 0xfffff, 0x92, 0xc);  // Kernel mode data segment
+    SetupGDTEntry(&GDT[1], 0, 0xfffff, 0b10011010, 0b1100);  // Kernel mode code segment
+    SetupGDTEntry(&GDT[2], 0, 0xfffff, 0b10010010, 0b1100);  // Kernel mode data segment
+    SetupGDTEntry(&GDT[3], 0, 0xfffff, 0b11111010, 0b1100);  // User mode code segment
+    SetupGDTEntry(&GDT[4], 0, 0xfffff, 0b11110010, 0b1100);  // User mode data segment
+    
+    kmemset(&TSS, 0, sizeof(struct TSS_Entry));
+    TSS.ss0 = KERNEL_DATA_SEGMENT;
+    TSS.esp0 = (uint32_t)&stack_top;
+    SetupGDTEntry(&GDT[5], (uint32_t)&TSS, sizeof(struct TSS_Entry), 0b10000000 | TSS_TYPE_32BIT_TSS_AVL, 0b1100);  // TSS
     InstallGDT();
     kprintf(" | Done\n");
 
