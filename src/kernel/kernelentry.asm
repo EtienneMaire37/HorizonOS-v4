@@ -79,7 +79,7 @@ _start:
 	and eax, 0xfffff000
 	or eax, 0b11
 
-	mov [page_directory + 4 * 768 - 0xc0000000], eax
+	mov [page_directory - 0xc0000000 + 4 * 768], eax
 
 	mov ecx, page_directory
     sub ecx, 0xc0000000
@@ -98,10 +98,11 @@ _start:
 	push ebx ; multiboot info
 
 	call kernel
+	cli
 
 	add esp, 8 
 
-	jmp $
+	jmp _halt
 
 MAGIC_NUMBER: dd 0
 MULTIBOOT_INFO: dd 0
@@ -110,8 +111,8 @@ section .text
 
 global _halt
 _halt:
-	cli
 .loop:
+	cli
   	hlt
 	jmp .loop
 

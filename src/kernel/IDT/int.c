@@ -1,6 +1,6 @@
 #pragma once
 
-void kernelPanic(uint8_t intNb, uint8_t errorCode)
+void kernelPanic(struct IntRegisters params)
 {
     DisableInterrupts();
     textColor = BG_BLUE;
@@ -11,11 +11,13 @@ void kernelPanic(uint8_t intNb, uint8_t errorCode)
     textColor = (FG_LIGHTRED | BG_BLUE);
     kfprintf(kstdout, "Kernel panic\n\n\t");
     textColor = (FG_WHITE | BG_BLUE);
-    kfprintf(kstdout, "Exception number: %u\n\n\t", intNb);
-    kfprintf(kstdout, "Error:       %s\n\t", errorString[intNb]);
-    kfprintf(kstdout, "Error code:  0x%x\n\n\t", errorCode);
+    kfprintf(kstdout, "Exception number: %u\n\n\t", params.interruptNumber);
+    kfprintf(kstdout, "Error:       %s\n\t", errorString[params.interruptNumber]);
+    kfprintf(kstdout, "Error code:  0x%x\n\n\t", params.errorCode);
 
-    LOG("ERROR", "Kernel panic : Exception number : %u ; Error : %s ; Error code = %u", intNb, errorString[intNb], errorCode);
+    kfprintf(kstdout, "cr2:  0x%x\n", params.cr2);
+
+    LOG("ERROR", "Kernel panic : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
 
     Halt();
 }
@@ -24,7 +26,7 @@ void InterruptHandler(struct IntRegisters params)
 {
     if(params.interruptNumber < 32)            // ISR
     {
-        kernelPanic(params.interruptNumber, params.errorCode);
+        kernelPanic(params);
         return;
     }
     else if(params.interruptNumber < 32 + 16)  // IRQ
@@ -57,7 +59,7 @@ void InterruptHandler(struct IntRegisters params)
                     currentTask = currentTask->nextTask;
                     params = currentTask->registers;
 
-                    LOG("INFO", "Switched to task \"%s\"", currentTask->name);
+                    LOG("INFO", "Switched to task \"%s\" (eip : 0x%x)", currentTask->name, currentTask->registers.eip);
                 }
             }
 

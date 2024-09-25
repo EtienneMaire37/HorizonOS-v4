@@ -2,6 +2,7 @@
 
 struct IntRegisters
 {
+    uint32_t cr2;
     uint32_t edi, esi, ebp;
     uint32_t esp;   // ESP before pushing the other GP registers
     uint32_t ebx, edx, ecx, eax;
@@ -47,5 +48,5 @@ char* errorString[32] =
     ""
 };
 
-void kernelPanic(uint8_t intNb, uint8_t errorCode);
+void kernelPanic(struct IntRegisters params);
 void InterruptHandler(struct IntRegisters params);

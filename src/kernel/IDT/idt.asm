@@ -89,6 +89,10 @@ intEnd:
 
 _InterruptHandler:
     pushad
+    mov eax, cr2
+    push eax
     call InterruptHandler
+    pop eax
+    mov cr2, eax
     popad
     jmp intEnd

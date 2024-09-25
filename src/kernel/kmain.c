@@ -72,8 +72,8 @@ void Halt()
     _halt();
 }
 
-uint32_t page_table_0[1024] __attribute__((aligned(4096)));
-uint32_t page_table_768[1024] __attribute__((aligned(4096)));
+struct PageTable_Entry page_table_0[1024] __attribute__((aligned(4096)));
+struct PageTable_Entry page_table_768[1024] __attribute__((aligned(4096)));
 
 void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 {
@@ -162,57 +162,30 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Initialized the keyboard"); 
 
-    // *((uint8_t*)0xb000000) = 0; // PAGE FAULT
+    LOG("INFO", "Unmapping lower half"); 
 
-    // LOG("INFO", "Setting up paging"); 
-
-    // // Map kernel to higher half (0xC0000000)
-
-    // InitPageDirectory();
-
-    // for (uint16_t i = 0; i < 256; i++)                                          // First megabyte
-    //     SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
-    // for (uint16_t i = 256; i < 1024; i++)                                       // First 4 megabytes
-    //     SetPage(&page_table_0[0], i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
-
-    // for (uint32_t i = 0; i < 1024; i++)                                         // 0xC0000000 - 0xC03FFFFF
-    //     SetPage(&page_table_768[0], i, i * 4096 + (uint32_t)&_kernelStart, PAGING_SUPERVISOR_LEVEL, true);
-
-    // AddPageTable(0, &page_table_0[0], PAGING_SUPERVISOR_LEVEL, true);
-    // AddPageTable(768, &page_table_768[0], PAGING_SUPERVISOR_LEVEL, true);
-
-    // ReloadPageDirectory();
-    // EnablePaging();
-
-    // while(true);
-
-    // JumpToHigherHalf();
-}
-
-void HigherHalf()
-{
-    for (uint16_t i = 256; i < 1024; i++)                                       // 0x100000 - 0x3fffff
+    for (uint16_t i = 256; i < 1024; i++)                                       
         RemovePage(&page_table_0[0], i);
+
+    AddPageTable(1023, (struct PageTable_Entry*)&page_directory, PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
 
     ReloadPageDirectory();
 
     EnableInterrupts(); 
     LOG("INFO", "Enabled interrupts"); 
 
-    // void A()
-    // {
-    //     while(true) *(char*)(0xb8000) = 'A';
-    // }
+    void A()
+    {
+        while(true) *(char*)(0xb8000) = 'A';
+    }
 
-    // void B()
-    // {
-    //     while(true) *(char*)(0xb8000) = 'B';
-    // }
+    void B()
+    {
+        while(true) *(char*)(0xb8000) = 'B';
+    }
 
-    // struct Task taskA = CreateTask("Task A", (uint32_t)&A), taskB = CreateTask("Task B", (uint32_t)&B);
-    // InitMultitasking(&taskA);
-    // AddTask(&taskB);
-    // EnableMultitasking();
-
-    while(true);
+    struct Task taskA = CreateTask("Task A", (uint32_t)&A), taskB = CreateTask("Task B", (uint32_t)&B);
+    InitMultitasking(&taskA);
+    AddTask(&taskB);
+    EnableMultitasking();
 }
