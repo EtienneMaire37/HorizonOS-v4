@@ -3,14 +3,19 @@
 void kernelPanic(struct IntRegisters params)
 {
     DisableInterrupts();
+
     textColor = BG_BLUE;
     ClearScreen(' ');
+
     textCursor = 4 + 2 * 80;
     UpdateCursor();
     HideCursor();
+
     textColor = (FG_LIGHTRED | BG_BLUE);
     kfprintf(kstdout, "Kernel panic\n\n\t");
+
     textColor = (FG_WHITE | BG_BLUE);
+
     kfprintf(kstdout, "Exception number: %u\n\n\t", params.interruptNumber);
     kfprintf(kstdout, "Error:       %s\n\t", errorString[params.interruptNumber]);
     kfprintf(kstdout, "Error code:  0x%x\n\n\t", params.errorCode);
@@ -22,20 +27,18 @@ void kernelPanic(struct IntRegisters params)
     Halt();
 }
 
-#define ReturnFromISR() {multitaskingEnabled = isMultitaskingEnabled; return TaskDataSegment(*currentTask);}
+#define ReturnFromISR() { return TaskDataSegment(*currentTask); }
 
 uint32_t InterruptHandler(struct IntRegisters params)
 {
-    bool isMultitaskingEnabled = multitaskingEnabled;
-    multitaskingEnabled = false;
-    if(params.interruptNumber < 32)            // ISR
+    if(params.interruptNumber < 32)            // Fault
     {
         LOG("ERROR", "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
 
-        // if (currentTask->ring == 0b00)
+        if (currentTask->ring == 0b00)
             kernelPanic(params);
-        // else
-        //     DeleteCurrentTask(&params);
+        else
+            DeleteCurrentTask(&params);
         
         ReturnFromISR();
     }
@@ -59,7 +62,7 @@ uint32_t InterruptHandler(struct IntRegisters params)
         case 0:
             HandleIRQ0();
             
-            if (isMultitaskingEnabled)
+            if (multitaskingEnabled)
                 TaskSwitch(&params);
 
             break;

@@ -16,6 +16,7 @@ struct Task
 #define TASK_SWITCH_DELAY 40
 
 uint8_t taskSwitchCounter = TASK_SWITCH_DELAY;
+uint16_t taskCount = 0;
 bool multitaskingEnabled = false;
 
 struct Task* firstTask;
@@ -47,20 +48,27 @@ struct Task CreateTask(char* name, uint32_t address, uint8_t ring)
 void AddTask(struct Task* task)
 {
     firstTask->previousTask->nextTask = task;
+    task->previousTask = firstTask->previousTask;
     task->nextTask = firstTask;
     firstTask->previousTask = task;
+
+    taskCount++;
 }
 
 void DeleteTask(struct Task* task)
 {
     task->previousTask->nextTask = task->nextTask;
     task->nextTask->previousTask = task->previousTask;
+
+    taskCount--;
 }
 
 void InitMultitasking(struct Task* task)
 {
     firstTask = task;
     firstTask->nextTask = firstTask->previousTask = firstTask;
+
+    taskCount = 1;
 }
 
 void EnableMultitasking()
@@ -92,8 +100,11 @@ void DeleteCurrentTask(struct IntRegisters* params)
 {
     LOG("INFO", "Killing task \"%s\"", currentTask->name);
 
-    currentTask = currentTask->previousTask;
-    *params = currentTask->registers;
-    DeleteTask(currentTask->nextTask);
+    // currentTask = currentTask->previousTask;
+    // *params = currentTask->registers;
+    // DeleteTask(currentTask->nextTask);
+    // TaskSwitch(params);
+
+    DeleteTask(currentTask);
     TaskSwitch(params);
 }

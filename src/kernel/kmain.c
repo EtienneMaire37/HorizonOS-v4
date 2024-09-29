@@ -188,7 +188,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     void B()
     {
-        // DisableInterrupts(); // - GPF
+        DisableInterrupts(); // * GPF
         while(true) *(char*)(0xb8000) = 'B';
     }
 
