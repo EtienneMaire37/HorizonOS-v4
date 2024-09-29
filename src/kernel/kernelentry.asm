@@ -28,7 +28,7 @@ section .multiboot.text
 extern kernel
 extern page_directory
 extern page_table_0
-extern page_table_768
+extern page_table_768_1023
 global _start
 _start:
 	cli
@@ -62,7 +62,7 @@ _start:
 		mul edx
 		or eax, 0b111
 
-		mov [page_table_768 + 4 * ebx - 0xc0000000], eax
+		mov [page_table_768_1023 + 4 * ebx - 0xc0000000], eax
 
 		inc ebx
 		loop .loopPT768
@@ -74,7 +74,7 @@ _start:
 
 	mov [page_directory - 0xc0000000], eax
 
-	mov eax, page_table_768
+	mov eax, page_table_768_1023
 	sub eax, 0xc0000000
 	and eax, 0xfffff000
 	or eax, 0b111

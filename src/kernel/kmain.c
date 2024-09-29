@@ -72,7 +72,7 @@ void Halt()
 }
 
 struct PageTable_Entry page_table_0[1024] __attribute__((aligned(4096)));
-struct PageTable_Entry page_table_768[1024] __attribute__((aligned(4096)));
+struct PageTable_Entry page_table_768_1023[256][1024] __attribute__((aligned(4096)));
 
 void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 {
@@ -92,9 +92,10 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
 
-    if (kernelSize >= 0x400000)
+    uint32_t maxKernelSize = (~0xC0000000) + 1;
+    if (kernelSize >= maxKernelSize)
     {
-        LOG("CRITICAL", "Kernel is too big (max 4MB)"); 
+        LOG("CRITICAL", "Kernel is too big (max %uB)", maxKernelSize); 
         kabort();
     }
 
@@ -169,10 +170,14 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Initialized the keyboard"); 
 
-    LOG("INFO", "Unmapping lower half"); 
+    LOG("INFO", "Setting up paging"); 
 
     for (uint16_t i = 256; i < 1024; i++)                                       
         RemovePage(&page_table_0[0], i);
+
+    for (uint16_t i = 1; i < 256; i++)
+        for (uint16_t j = 0; j < 1024; j++)
+            SetPage(&page_table_768_1023[i][0], j, (j + 4096 * i) * 4096, PAGING_USER_LEVEL, true);
 
     AddPageTable(1023, (struct PageTable_Entry*)&page_directory, PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
 
