@@ -30,7 +30,6 @@ void Halt();
 #include "IO/io.h"
 #include "IO/ps2.h"
 #include "debug/out.h"
-#include "klibc/reboot.h"
 
 #include "GDT/gdt.h"
 #include "IDT/idt.h"
@@ -47,6 +46,8 @@ void Halt();
 
 #include "paging/paging.h"
 #include "multitasking/task.h"
+
+#include "klibc/reset.h"
 
 // ---------------------------------------------------------------
 
@@ -92,7 +93,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
 
-    uint32_t maxKernelSize = (~0xC0000000) + 1;
+    uint32_t maxKernelSize = (~(uint32_t)&_kernelStart) + 1;
     if (kernelSize >= maxKernelSize)
     {
         LOG("CRITICAL", "Kernel is too big (max %uB)", maxKernelSize); 
@@ -172,7 +173,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Setting up paging"); 
 
-    for (uint16_t i = 256; i < 1024; i++)                                       
+    for (uint16_t i = 256; i < 1024; i++)
         RemovePage(&page_table_0[0], i);
 
     for (uint16_t i = 1; i < 256; i++)
@@ -184,7 +185,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     ReloadPageDirectory();
 
     EnableInterrupts(); 
-    LOG("INFO", "Enabled interrupts"); 
+    LOG("INFO", "Enabled interrupts");  
 
     void A()
     {
