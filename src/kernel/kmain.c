@@ -137,6 +137,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     TSS.esp0 = (uint32_t)&stack_top;
     SetupGDTEntry(&GDT[5], (uint32_t)&TSS, sizeof(struct TSS_Entry), 0b10000000 | TSS_TYPE_32BIT_TSS_AVL, 0b1100);  // TSS
     InstallGDT();
+    LoadTSS();
     kprintf(" | Done\n");
 
     LOG("INFO", "Loaded the GDT"); 
@@ -187,11 +188,18 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     void B()
     {
+        // DisableInterrupts(); // - GPF
         while(true) *(char*)(0xb8000) = 'B';
     }
 
-    struct Task taskA = CreateTask("Task A", (uint32_t)&A), taskB = CreateTask("Task B", (uint32_t)&B);
+    void C()
+    {
+        while(true) *(char*)(0xb8000) = 'C';
+    }
+
+    struct Task taskA = CreateTask("Task A", (uint32_t)&A, 0b00), taskB = CreateTask("Task B", (uint32_t)&B, 0b11), taskC = CreateTask("Task C", (uint32_t)&C, 0b00);
     InitMultitasking(&taskA);
     AddTask(&taskB);
+    AddTask(&taskC);
     EnableMultitasking();
 }

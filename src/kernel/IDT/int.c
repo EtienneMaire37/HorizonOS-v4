@@ -17,29 +17,39 @@ void kernelPanic(struct IntRegisters params)
 
     kfprintf(kstdout, "cr2:  0x%x\n", params.cr2);
 
-    LOG("ERROR", "Kernel panic : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
+    // LOG("ERROR", "Kernel panic : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
 
     Halt();
 }
 
-void InterruptHandler(struct IntRegisters params)
+#define ReturnFromISR() {multitaskingEnabled = isMultitaskingEnabled; return TaskDataSegment(*currentTask);}
+
+uint32_t InterruptHandler(struct IntRegisters params)
 {
+    bool isMultitaskingEnabled = multitaskingEnabled;
+    multitaskingEnabled = false;
     if(params.interruptNumber < 32)            // ISR
     {
-        kernelPanic(params);
-        return;
+        LOG("ERROR", "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
+
+        // if (currentTask->ring == 0b00)
+            kernelPanic(params);
+        // else
+        //     DeleteCurrentTask(&params);
+        
+        ReturnFromISR();
     }
     else if(params.interruptNumber < 32 + 16)  // IRQ
     {
         uint8_t irqNumber = params.interruptNumber - 32;
 
         if(irqNumber == 7 && !(PIC_GetISR() >> 7))
-            return;
+            ReturnFromISR();
         if(irqNumber == 15 && !(PIC_GetISR() >> 15))
         {
             outb(PIC1_CMD, PIC_EOI);
 	        io_wait();
-            return;
+            ReturnFromISR();
         }
         
         // LOG("INFO", "Interrupt %u handled", params.interruptNumber);
@@ -49,19 +59,8 @@ void InterruptHandler(struct IntRegisters params)
         case 0:
             HandleIRQ0();
             
-            if (multitaskingEnabled)
-            {
-                taskSwitchCounter--;
-                if(!taskSwitchCounter)
-                {
-                    taskSwitchCounter = TASK_SWITCH_DELAY;
-                    currentTask->registers = params;
-                    currentTask = currentTask->nextTask;
-                    params = currentTask->registers;
-
-                    LOG("INFO", "Switched to task \"%s\" (eip : 0x%x)", currentTask->name, currentTask->registers.eip);
-                }
-            }
+            if (isMultitaskingEnabled)
+                TaskSwitch(&params);
 
             break;
 
@@ -75,6 +74,7 @@ void InterruptHandler(struct IntRegisters params)
 
         PIC_SendEOI(irqNumber);
 
-        return;
+        ReturnFromISR();
     }
+    ReturnFromISR();
 }

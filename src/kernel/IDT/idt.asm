@@ -10,7 +10,6 @@ LoadIDT:
 
 %macro INT_ERROR_CODE 1
 INT_%1:
-    cli
     push %1
 
     jmp _InterruptHandler
@@ -18,7 +17,6 @@ INT_%1:
 
 %macro INT_NO_ERROR_CODE 1
 INT_%1:
-    cli
     push 0     ; dummy error code
     push %1
 
@@ -87,12 +85,23 @@ intEnd:
     add esp, 8
     iret 
 
+extern multitasking_code_segment
+extern multitasking_data_segment
 _InterruptHandler:
     pushad
+
     mov eax, cr2
     push eax
+
     call InterruptHandler
-    pop eax
-    mov cr2, eax
+    
+    mov   ds, ax
+    mov   es, ax
+    mov   fs, ax
+    mov   gs, ax
+ 
+    add esp, 4
+
     popad
+
     jmp intEnd

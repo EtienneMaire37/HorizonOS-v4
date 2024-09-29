@@ -47,7 +47,7 @@ _start:
 		mov edx, 4096
 		mov eax, ebx
 		mul edx
-		or eax, 0b11
+		or eax, 0b111
 
 		mov [page_table_0 + 4 * ebx - 0xc0000000], eax
 
@@ -60,7 +60,7 @@ _start:
 		mov edx, 4096
 		mov eax, ebx
 		mul edx
-		or eax, 0b11
+		or eax, 0b111
 
 		mov [page_table_768 + 4 * ebx - 0xc0000000], eax
 
@@ -70,14 +70,14 @@ _start:
 	mov eax, page_table_0
 	sub eax, 0xc0000000
 	and eax, 0xfffff000
-	or eax, 0b11
+	or eax, 0b111
 
 	mov [page_directory - 0xc0000000], eax
 
 	mov eax, page_table_768
 	sub eax, 0xc0000000
 	and eax, 0xfffff000
-	or eax, 0b11
+	or eax, 0b111
 
 	mov [page_directory - 0xc0000000 + 4 * 768], eax
 

@@ -1,8 +1,0 @@
-0000-00-00 	 00:00:00,000 	 INFO 	Kernel loaded
-0000-00-00 	 00:00:00,000 	 INFO 	Loaded the GDT
-0000-00-00 	 00:00:00,000 	 INFO 	Loaded the IDT
-0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIC
-0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIT
-0000-00-00 	 00:00:00,000 	 INFO 	Initialized the keyboard
-0000-00-00 	 00:00:00,000 	 INFO 	Initialized memory allocation
-0000-00-00 	 00:00:00,000 	 INFO 	Enabled interrupts

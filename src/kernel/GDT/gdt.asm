@@ -19,6 +19,6 @@ LoadGDT:
 
 global LoadTSS
 LoadTSS:
-	mov ax, (5 * 8) | 0b00
+	mov ax, 0x28 
 	ltr ax
 	ret

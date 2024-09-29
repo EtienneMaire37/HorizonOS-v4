@@ -8,8 +8,10 @@ struct IntRegisters
     uint32_t ebx, edx, ecx, eax;
     uint32_t interruptNumber, errorCode;
     uint32_t eip;
-    uint16_t cs;
+    uint32_t cs;
     uint32_t eflags;
+    uint32_t currEsp;
+    uint32_t ds;
 };
 
 char* errorString[32] = 
@@ -49,4 +51,4 @@ char* errorString[32] =
 };
 
 void kernelPanic(struct IntRegisters params);
-void InterruptHandler(struct IntRegisters params);
+uint32_t InterruptHandler(struct IntRegisters params);

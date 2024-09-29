@@ -57,10 +57,11 @@ struct TSS_Entry
 #define TSS_TYPE_32BIT_TSS_BSY  0xB
 #define TSS_TYPE_LDT            0x2
 
-#define KERNEL_CODE_SEGMENT 0x08
-#define KERNEL_DATA_SEGMENT 0x10
-#define USER_CODE_SEGMENT   0x18
-#define USER_DATA_SEGMENT   0x20
+#define KERNEL_CODE_SEGMENT 	0x08
+#define KERNEL_DATA_SEGMENT 	0x10
+#define USER_CODE_SEGMENT   	0x18
+#define USER_DATA_SEGMENT   	0x20
+#define TSS_SEGMENT   			0x28
 
 struct GDT_Entry GDT[6];
 struct TSS_Entry TSS;

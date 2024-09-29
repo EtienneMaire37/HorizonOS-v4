@@ -17,10 +17,10 @@ void SetupIDTEntry(struct IDT_Entry* entry, uint16_t segment, uint32_t offset, u
 void InstallIDT()
 {
     for(uint8_t i = 0; i < 32; i++)
-        SetupIDTEntry(&IDT[i], 0x08, INTTable[i], 0, ISR_TRAP_GATE_32);
+        SetupIDTEntry(&IDT[i], KERNEL_CODE_SEGMENT, INTTable[i], 0b00, ISR_TRAP_GATE_32);
 
     for(uint16_t i = 32; i < 256; i++)
-        SetupIDTEntry(&IDT[i], 0x08, INTTable[i], 0, ISR_INTERRUPT_GATE_32);
+        SetupIDTEntry(&IDT[i], KERNEL_CODE_SEGMENT, INTTable[i], 0b00, ISR_INTERRUPT_GATE_32);
 
     _idtr.size = sizeof(IDT) - 1;
     _idtr.address = (uint32_t)&IDT;
