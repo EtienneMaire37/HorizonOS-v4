@@ -177,7 +177,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     for (uint16_t i = 1; i < 256; i++)
         for (uint16_t j = 0; j < 1024; j++)
-            SetPage(&page_table_768_1023[i][0], j, (j + 4096 * i) * 4096, PAGING_USER_LEVEL, true);
+            SetPage(&page_table_768_1023[i][0], j, (j + 4096 * i) * 4096, PAGING_SUPERVISOR_LEVEL, true);
 
     AddPageTable(1023, (struct PageTable_Entry*)&page_directory, PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
 
