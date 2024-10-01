@@ -5,6 +5,8 @@ uint32_t available_pages = 0;
 
 uint32_t memory_blocks_count = 0;
 
+uint8_t* memory_bitmap = NULL;
+
 struct UsableMemoryBlock
 {
     physical_address_t address;
@@ -15,9 +17,28 @@ struct UsableMemoryBlock usable_memory_layout[512];
 
 virtual_address_t PhysicalAddressToVirtual(physical_address_t address)
 {
-    // ! A trick that only works for the higher half addresses
-    // TODO: Make it actually compute the address
-    return address + 0xc0000000;
+    //! Cant work because it needs the physical address to compute itself
+    // for (uint32_t i = 0; i < 1024; i++)
+    // {
+    //     for (uint16_t j = 0; j < 1024; j++)
+    //     {
+    //         struct PageDirectory_Entry_4KB pde = page_directory[i];
+    //         struct PageTable_Entry pte = ((struct PageTable_Entry*)(pde.address << 12))[j];
+    //         physical_address_t pte_address = pte.address << 12;
+    //         if (address >= pte_address && address < pte_address + 4096)
+    //         {
+    //             struct VirtualAddressLayout layout;
+    //             layout.page_directory_entry = i;
+    //             layout.page_table_entry = j;
+    //             layout.page_offset = address & 0xfff;
+    //             return *(virtual_address_t*)&layout;
+    //         }
+    //     }
+    // }
+    // return 0;
+
+    // * Temporary fix
+    return (virtual_address_t)(address + 0xc0000000);
 }
 
 physical_address_t VirtualAddressToPhysical(virtual_address_t address)
@@ -136,7 +157,6 @@ void DetectRemainingPages()
         else
         {
             same_memory_block = false;
-            // memory_blocks_count++;
             i += sizeof(multiboot_memory_map_t);
         }
     }
@@ -144,4 +164,88 @@ void DetectRemainingPages()
     if (usable_memory_layout[0].address == first_page_after_kernel + 4096)
         usable_memory_layout[0].address = first_page_after_kernel;
     usable_memory_layout[0].page_count++;
+}
+
+physical_address_t GetPageAddress(uint32_t index)
+{
+    for (uint16_t i = 0; i < memory_blocks_count; i++)
+    {
+        if (index < usable_memory_layout[i].page_count)
+            return usable_memory_layout[i].address + 4096 * index;
+        index -= usable_memory_layout[i].page_count;
+    }
+    return 0;
+}
+
+uint32_t GetPageIndex(physical_address_t address)
+{
+    if ((address & 0xfff) != 0) return 0;
+    for (uint16_t i = 0; i < memory_blocks_count; i++)
+    {
+        if (address >= usable_memory_layout[i].address && address < usable_memory_layout[i].address + 4096 * usable_memory_layout[i].page_count)
+            return (usable_memory_layout[i].address - address) / 4096;
+    }
+    return 0;   // Invalid since it references the bitmap
+}
+
+void PFA_SetPage(uint32_t index, bool isFree)
+{
+    if (index >= available_pages)
+        return;
+
+    physical_address_t page = GetPageAddress(index / (4096 * 8));
+    uint16_t offset = (index / 8) % 4096;
+    uint8_t bit = index % 8;
+
+    if (isFree)
+        *(uint8_t*)PhysicalAddressToVirtual(page + offset) |= (1 << bit);
+    else
+        *(uint8_t*)PhysicalAddressToVirtual(page + offset) &= ~(uint8_t)(1 << bit);
+}
+
+bool PFA_GetPage(uint32_t index)
+{
+    if (index >= available_pages)
+        return false;
+
+    physical_address_t page = GetPageAddress(index / (4096 * 8));
+    uint16_t offset = (index / 8) % 4096;
+    uint8_t bit = index % 8;
+
+    return (*(uint8_t*)PhysicalAddressToVirtual(page + offset) >> bit) & 1;
+}
+
+void SetupMemAllocations()
+{
+    memory_bitmap = (uint8_t*)PhysicalAddressToVirtual(first_page_after_kernel);
+    uint8_t bitmap_length = ((available_pages + 7) / 8 + 4095) / 4096; // * In pages
+    // LOG("INFO", "Bitmap length : %u pages", bitmap_length);
+    for (uint32_t i = 0; i < bitmap_length; i++)
+        PFA_SetPage(i, false);
+    for (uint32_t i = bitmap_length; i < available_pages; i++)
+        PFA_SetPage(i, true);
+}
+
+void* AllocatePage()
+{
+    for (uint32_t i = 0; i < available_pages; i++)
+    {
+        if (PFA_GetPage(i)) // Page is free
+        {
+            PFA_SetPage(i, false);
+            return (void*)PhysicalAddressToVirtual(GetPageAddress(i));
+        }
+    }
+    return NULL;
+}
+
+void FreePage(void* page)
+{
+    uint32_t index = GetPageIndex(VirtualAddressToPhysical((virtual_address_t)page));
+    if (PFA_GetPage(index))
+    {
+        LOG("CRITICAL", "Kernel tried to free an already free page");
+        kabort();
+    }
+    PFA_SetPage(index, true);
 }

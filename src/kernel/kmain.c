@@ -214,6 +214,10 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     for (uint16_t i = 0; i < memory_blocks_count; i++)
         LOG("INFO", "Block : 0x%lx ; %u pages", usable_memory_layout[i].address, usable_memory_layout[i].page_count);  
 
+    SetupMemAllocations();
+
+    while(true);
+
     void A()
     {
         while(true) *(char*)(0xb8000) = 'A';
