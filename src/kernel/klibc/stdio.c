@@ -91,6 +91,28 @@ void kprintf_x(uint32_t val)
 	}
 }
 
+void kprintf_lx(uint64_t val)
+{
+	if(val < 16)
+	{
+		outc(hex[val]);
+	}
+	else
+	{
+		bool first0 = true;
+		uint8_t off = 60;
+		for(uint8_t i = 0; i < 16; i++)
+		{
+			uint8_t digit = (val >> off) & 0x0f;
+			if (digit)
+				first0 = false;
+			if (!first0)
+				outc(hex[digit]);
+			off -= 4;
+		}
+	}
+}
+
 void kprintf_X(uint32_t val)
 {
 	if(val < 16)
@@ -130,11 +152,12 @@ void kfprintf(kFILE* file, char* fmt, ...)
 	uint32_t* arg = (uint32_t*)&fmt;
 	arg++;
 
+	bool next_as_long = false;
+
 	while(*fmt)
 	{
-		switch(*fmt)
+		if (*fmt == '%' || next_as_long)
 		{
-		case '%':
 			fmt++;
 
 			switch(*fmt) // TODO: Add %f
@@ -143,6 +166,12 @@ void kfprintf(kFILE* file, char* fmt, ...)
 				outc('%');
 				arg--;
 
+				break;
+
+			case 'l':
+				next_as_long = true;
+				arg--;
+				fmt--;
 				break;
 
 			case 's':
@@ -166,7 +195,14 @@ void kfprintf(kFILE* file, char* fmt, ...)
 				break;
 
 			case 'x':
-				kprintf_x(*(uint32_t*)arg);
+				if (next_as_long)
+				{
+					next_as_long = false;
+					kprintf_lx(*(uint64_t*)arg);
+					arg++;
+				}
+				else
+					kprintf_x(*(uint32_t*)arg);
 
 				break;
 
@@ -182,12 +218,9 @@ void kfprintf(kFILE* file, char* fmt, ...)
 			}
 
 			arg++;
-
-			break;
-
-		default:
-			outc(*fmt);
 		}
+		else
+			outc(*fmt);
 		
 		fmt++;
 	}

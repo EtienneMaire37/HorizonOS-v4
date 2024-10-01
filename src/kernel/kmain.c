@@ -10,10 +10,14 @@ multiboot_info_t* multibootInfo;
 #define GB (1024 * MB)
 #define TB (1024 * GB)
 
+typedef uint64_t physical_address_t;
+typedef uint32_t virtual_address_t;
+
 extern uint8_t stack_top;
 
 extern uint8_t _kernelStart;
 extern uint8_t _kernelEnd;
+physical_address_t kEndAddress;
 uint32_t kernelSize;
 
 uint32_t availableMem = 0;
@@ -48,6 +52,8 @@ void Halt();
 #include "multitasking/task.h"
 
 #include "klibc/reset.h"
+
+#include "mmanager/page_frame_allocator.h"
 
 // ---------------------------------------------------------------
 
@@ -87,6 +93,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     multibootInfo = _multibootInfo;
 
     kernelSize = &_kernelEnd - &_kernelStart;
+    kEndAddress = VirtualAddressToPhysical((virtual_address_t)&_kernelEnd);
 
     ClearScreen(' ');
     ResetCursor();
@@ -116,10 +123,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     for(uint32_t i = 0; i < multibootInfo->mmap_length; i += sizeof(multiboot_memory_map_t)) 
     {
         multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(multibootInfo->mmap_addr + i);
-
+        physical_address_t addr = ((physical_address_t)mmmt->addr_high << 8) | mmmt->addr_low;
+        uint32_t len = mmmt->len_low;
         if(mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) 
         {
-            availableMem += mmmt->len_low;
+            LOG("INFO", "Memory block : address : 0x%lx ; length : %u", addr, len);
+            availableMem += len;
         }
     }
 
@@ -186,6 +195,24 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     EnableInterrupts(); 
     LOG("INFO", "Enabled interrupts");  
+
+    if(!DetectFirstAvailablePage())
+    {
+        LOG("CRITICAL", "Not enough memory to run HorizonOS");
+        kabort();
+    }
+
+    DetectRemainingPages();
+
+    LOG("INFO", "First page after kernel : 0x%x", first_page_after_kernel);  
+    LOG("INFO", "Available pages : %u", available_pages);  
+    
+    kprintf("Usable memory : %u bytes\n", available_pages * 4096);
+    LOG("INFO", "Usable memory : %u bytes", available_pages * 4096);  
+
+    LOG("INFO", "Usable memory layout :");  
+    for (uint16_t i = 0; i < memory_blocks_count; i++)
+        LOG("INFO", "Block : 0x%lx ; %u pages", usable_memory_layout[i].address, usable_memory_layout[i].page_count);  
 
     void A()
     {

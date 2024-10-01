@@ -69,5 +69,5 @@ struct TSS_Entry TSS;
 extern void LoadGDT();
 extern void LoadTSS();
 
-void SetupGDTEntry(struct GDT_Entry* entry, uint32_t base, uint32_t limit, uint8_t access_byte, uint8_t flags);
+void SetupGDTEntry(struct GDT_Entry* entry, physical_address_t base, uint32_t limit, uint8_t access_byte, uint8_t flags);
 void InstallGDT();

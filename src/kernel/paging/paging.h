@@ -32,6 +32,13 @@ struct PageTable_Entry
     uint32_t address : 20;  // High bits
 } __attribute__((packed));
 
+struct VirtualAddressLayout
+{
+    uint16_t page_offset : 12;
+    uint16_t page_table_entry : 10;
+    uint16_t page_directory_entry : 10;
+} __attribute__((packed));
+
 // struct PageFault_ErrorCode
 // {
 //     uint8_t present : 1;    // 0: Non-present page ; 1: Page-Protection violatiob
@@ -78,7 +85,7 @@ void RemovePage(struct PageTable_Entry* pt, uint16_t index)
     pt[index].present = 0;
 } 
 
-void SetPage(struct PageTable_Entry* pt, uint16_t index, uint32_t address, bool user_supervisor, bool read_write)
+void SetPage(struct PageTable_Entry* pt, uint16_t index, physical_address_t address, bool user_supervisor, bool read_write)
 {
     pt[index].global = 0;
     pt[index].cache_disable = 0;

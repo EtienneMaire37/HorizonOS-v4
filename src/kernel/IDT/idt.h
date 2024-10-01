@@ -31,5 +31,5 @@ struct IDT_Entry IDT[256];
 extern void LoadIDT();
 extern uint32_t INTTable[256];  // ptrs to the isrs
 
-void SetupIDTEntry(struct IDT_Entry* entry, uint16_t segment, uint32_t offset, uint8_t privilege, uint8_t type);
+void SetupIDTEntry(struct IDT_Entry* entry, uint16_t segment, physical_address_t offset, uint8_t privilege, uint8_t type);
 void InstallIDT();

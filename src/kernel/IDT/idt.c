@@ -1,6 +1,6 @@
 #pragma once
 
-void SetupIDTEntry(struct IDT_Entry* entry, uint16_t segment, uint32_t offset, uint8_t privilege, uint8_t type)
+void SetupIDTEntry(struct IDT_Entry* entry, uint16_t segment, physical_address_t offset, uint8_t privilege, uint8_t type)
 {
     entry->segment_selector = segment;
 

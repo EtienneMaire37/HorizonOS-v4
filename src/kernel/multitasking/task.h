@@ -25,7 +25,7 @@ struct Task* currentTask;
 #define TaskCodeSegment(__task) (__task).ring == 0b11 ? USER_CODE_SEGMENT | 0b11 : KERNEL_CODE_SEGMENT
 #define TaskDataSegment(__task) (__task).ring == 0b11 ? USER_DATA_SEGMENT | 0b11 : KERNEL_DATA_SEGMENT
 
-struct Task CreateTask(char* name, uint32_t address, uint8_t ring)
+struct Task CreateTask(char* name, virtual_address_t address, uint8_t ring)
 {
     if (ring != 0b11) ring = 0b00;
     struct Task task;

@@ -10,7 +10,7 @@ run: horizonos.iso
 	-accel tcg,thread=single                       		\
 	-cpu core2duo                                  		\
 	-debugcon file:debug/${DATE}.log					\
-	-m 4096                                         	\
+	-m 256                                        		\
 	-drive format=raw,media=cdrom,file=horizonos.iso    \
 	-serial stdio                                  		\
 	-smp 1                                         		\

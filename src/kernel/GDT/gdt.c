@@ -1,6 +1,6 @@
 #pragma once
 
-void SetupGDTEntry(struct GDT_Entry* entry, uint32_t base, uint32_t limit, uint8_t access_byte, uint8_t flags)
+void SetupGDTEntry(struct GDT_Entry* entry, physical_address_t base, uint32_t limit, uint8_t access_byte, uint8_t flags)
 {
     entry->base_lo = (base & 0xffff);
     entry->base_mid = ((base >> 16) & 0xff);
