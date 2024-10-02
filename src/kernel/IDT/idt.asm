@@ -93,12 +93,18 @@ _InterruptHandler:
     mov eax, cr2
     push eax
 
+    mov eax, cr3
+    push eax
+
     call InterruptHandler
     
     mov   ds, ax
     mov   es, ax
     mov   fs, ax
     mov   gs, ax
+
+    pop eax
+    mov cr3, eax
  
     add esp, 4
 

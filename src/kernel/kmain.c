@@ -31,6 +31,9 @@ void Halt();
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
+physical_address_t VirtualAddressToPhysical(virtual_address_t address);
+virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
+
 #include "IO/io.h"
 #include "IO/ps2.h"
 #include "debug/out.h"
@@ -198,9 +201,9 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     }
 
     for (uint16_t i = 769; i < 1023; i++)
-        AddPageTable(i, VirtualAddressToPhysical((struct PageTable_Entry*)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
+        AddPageTable(page_directory, i, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
 
-    AddPageTable(1023, VirtualAddressToPhysical((struct PageTable_Entry*)&page_directory), PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
+    AddPageTable(page_directory, 1023, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_directory), PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
 
     ReloadPageDirectory();
 
@@ -226,8 +229,6 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         LOG("INFO", "Block : 0x%lx ; %u pages", usable_memory_layout[i].address, usable_memory_layout[i].page_count);  
 
     SetupMemAllocations();
-
-    while(true);
 
     void A()
     {

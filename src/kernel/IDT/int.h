@@ -2,6 +2,7 @@
 
 struct IntRegisters
 {
+    uint32_t cr3;
     uint32_t cr2;
     uint32_t edi, esi, ebp;
     uint32_t esp;   // ESP before pushing the other GP registers

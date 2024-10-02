@@ -38,7 +38,7 @@ uint32_t InterruptHandler(struct IntRegisters params)
         if (currentTask->ring == 0b00)
             kernelPanic(params);
         else
-            DeleteCurrentTask(&params);
+            KillCurrentTask(&params);
         
         ReturnFromISR();
     }

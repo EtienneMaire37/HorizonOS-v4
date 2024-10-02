@@ -14,3 +14,5 @@
 0000-00-00 	 00:00:00,000 	 INFO 	Usable memory : 266080256 bytes
 0000-00-00 	 00:00:00,000 	 INFO 	Usable memory layout :
 0000-00-00 	 00:00:00,000 	 INFO 	Block : 0x21e000 ; 64961 pages
+0000-00-00 	 00:00:00,000 	 ERROR 	Fault : Exception number : 14 ; Error : PAGE_FAULT ; Error code = 0x0
+0000-00-00 	 00:00:00,000 	 WARN 	Kernel halted

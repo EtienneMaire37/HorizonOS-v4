@@ -55,29 +55,27 @@ struct VirtualAddressLayout
 
 struct PageDirectory_Entry_4KB  page_directory[1024] __attribute__((aligned(4096)));
 
-void InitPageDirectory()
+void InitPageDirectory(struct PageDirectory_Entry_4KB* pd)
 {
     for(uint16_t i = 0; i < 1024; i++)
-    {
-        page_directory[i].present = 0;
-    }
+        pd[i].present = 0;
 }
 
-void AddPageTable(uint16_t index, struct PageTable_Entry* pt, bool user_supervisor, bool read_write)
+void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, struct PageTable_Entry* pt, bool user_supervisor, bool read_write)
 {
-    page_directory[index].page_size = 0;
-    page_directory[index].cache_disable = 0;
-    page_directory[index].write_through = 0;
-    page_directory[index].address = (((uint32_t)pt) >> 12);
-    page_directory[index].user_supervisor = user_supervisor;
-    page_directory[index].read_write = read_write;
-    page_directory[index].present = 1;
+    pd[index].page_size = 0;
+    pd[index].cache_disable = 0;
+    pd[index].write_through = 0;
+    pd[index].address = (((uint32_t)pt) >> 12);
+    pd[index].user_supervisor = user_supervisor;
+    pd[index].read_write = read_write;
+    pd[index].present = 1;
 } 
 
-void RemovePageTable(uint16_t index)
+void RemovePageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index)
 {
-    page_directory[index].page_size = 0;
-    page_directory[index].present = 0;
+    pd[index].page_size = 0;
+    pd[index].present = 0;
 } 
 
 void RemovePage(struct PageTable_Entry* pt, uint16_t index)

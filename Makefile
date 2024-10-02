@@ -18,7 +18,8 @@ run: horizonos.iso
 	-vga std 
 
 horizonos.iso: src/kernel/kernelentry.asm Makefile rmBin
-	 
+	tar -czvf bin/initrd.tar src/initrd/
+
 	$(ASM) -f elf32 -o "bin/kernelentry.o" "src/kernel/kernelentry.asm"
 	$(ASM) -f elf32 -o "bin/gdt.o" "src/kernel/GDT/gdt.asm"
 	$(ASM) -f elf32 -o "bin/idt.o" "src/kernel/IDT/idt.asm"
@@ -32,6 +33,7 @@ horizonos.iso: src/kernel/kernelentry.asm Makefile rmBin
 	
 	cp bin/kernel.elf root/boot/kernel.elf
 	cp src/grub.cfg root/boot/grub/grub.cfg
+	cp bin/initrd.tar root/boot/initrd.tar
 	 
 	grub-mkrescue -o horizonos.iso root
 
