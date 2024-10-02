@@ -79,7 +79,7 @@ void Halt()
 }
 
 struct PageTable_Entry page_table_0[1024] __attribute__((aligned(4096)));
-struct PageTable_Entry page_table_768_1023[256][1024] __attribute__((aligned(4096)));
+struct PageTable_Entry page_table_768_1023[256 * 1024] __attribute__((aligned(4096)));
 
 void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 {
@@ -186,10 +186,21 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         RemovePage(&page_table_0[0], i);
 
     for (uint16_t i = 1; i < 256; i++)
+    {
         for (uint16_t j = 0; j < 1024; j++)
-            SetPage(&page_table_768_1023[i][0], j, (j + 4096 * i) * 4096, PAGING_SUPERVISOR_LEVEL, true);
+        {
+            struct VirtualAddressLayout layout;
+            layout.page_directory_entry = i + 768;
+            layout.page_table_entry = j;
+            uint32_t address = *(uint32_t*)&layout + 0xc0000000;
+            SetPage(&page_table_768_1023[i * 1024], j, (address >> 12), PAGING_SUPERVISOR_LEVEL, true);
+        }
+    }
 
-    AddPageTable(1023, (struct PageTable_Entry*)&page_directory, PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
+    for (uint16_t i = 769; i < 1023; i++)
+        AddPageTable(i, VirtualAddressToPhysical((struct PageTable_Entry*)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
+
+    AddPageTable(1023, VirtualAddressToPhysical((struct PageTable_Entry*)&page_directory), PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
 
     ReloadPageDirectory();
 
@@ -225,7 +236,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     void B()
     {
-        DisableInterrupts(); // * GPF
+        // DisableInterrupts(); // * GPF
         while(true) *(char*)(0xb8000) = 'B';
     }
 
