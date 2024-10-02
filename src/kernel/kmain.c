@@ -46,6 +46,8 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 #include "IO/textio.h"
 #include "PIT/pit.h"
 
+#include "mmanager/page_frame_allocator.h"
+
 #include "klibc/math.h"
 #include "klibc/stdio.h"
 #include "klibc/stdlib.h"
@@ -55,8 +57,6 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 #include "multitasking/task.h"
 
 #include "klibc/reset.h"
-
-#include "mmanager/page_frame_allocator.h"
 
 // ---------------------------------------------------------------
 
@@ -73,7 +73,9 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 #include "klibc/stdlib.c"
 #include "klibc/string.c"
 
-// #include "klibc/kmalloc.c"
+#include "paging/paging.c"
+
+#include "mmanager/page_frame_allocator.c"
 
 void Halt()
 {

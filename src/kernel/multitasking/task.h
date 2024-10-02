@@ -38,6 +38,9 @@ struct Task CreateTask(char* name, virtual_address_t address, uint8_t ring)
     task.registers.ds = TaskDataSegment(task);
     task.registers.eip = address;
     task.registers.eflags = (1 << 9);  // Interrupt enable
+
+    task.page_directory_ptr = AllocatePage();
+    InitPageDirectory(task.page_directory_ptr);
     task.registers.cr3 = (uint32_t)VirtualAddressToPhysical((virtual_address_t)task.page_directory_ptr);
 
     task.registers.ebp = (uint32_t)&task.stack[STACK_SIZE - 1];
@@ -61,6 +64,8 @@ void KillTask(struct Task* task)
 {
     task->previousTask->nextTask = task->nextTask;
     task->nextTask->previousTask = task->previousTask;
+
+    FreePage(task->page_directory_ptr);
 
     taskCount--;
 }
@@ -101,11 +106,6 @@ void TaskSwitch(struct IntRegisters* params)
 void KillCurrentTask(struct IntRegisters* params)
 {
     LOG("INFO", "Killing task \"%s\"", currentTask->name);
-
-    // currentTask = currentTask->previousTask;
-    // *params = currentTask->registers;
-    // DeleteTask(currentTask->nextTask);
-    // TaskSwitch(params);
 
     KillTask(currentTask);
     TaskSwitch(params);
