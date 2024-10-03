@@ -22,17 +22,25 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address)
     // }
     // return 0;
 
-    // * Temporary fix
-    return (virtual_address_t)(address + 0xc0000000);
+    if(address < 0x100000)
+        return (physical_address_t)address;
+    if(address >= 0x100000 && address < 0x100000 + (uint32_t)(-0xc0000000))
+        return (physical_address_t)address + 0xc0000000;
+    return 0;
 }
 
 physical_address_t VirtualAddressToPhysical(virtual_address_t address)
 {
-    uint32_t _address = address;
-    struct VirtualAddressLayout layout = *(struct VirtualAddressLayout*)&_address;
-    struct PageDirectory_Entry_4KB pde = page_directory[layout.page_directory_entry];
-    struct PageTable_Entry pte = ((struct PageTable_Entry*)(pde.address << 12))[layout.page_table_entry];
-    return (pte.address << 12) | layout.page_offset;
+    // uint32_t _address = address;
+    // struct VirtualAddressLayout layout = *(struct VirtualAddressLayout*)&_address;
+    // struct PageDirectory_Entry_4KB pde = page_directory[layout.page_directory_entry];
+    // struct PageTable_Entry pte = ((struct PageTable_Entry*)PhysicalAddressToVirtual((physical_address_t)pde.address << 12))[layout.page_table_entry];
+    // return (pte.address << 12) | layout.page_offset;
+    if(address >= 0xc0000000)
+        return (physical_address_t)address - 0xc0000000;
+    if(address < 0x100000)
+        return (physical_address_t)address;
+    return 0;
 }
 
 bool IsPageValid(physical_address_t address)

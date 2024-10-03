@@ -6,6 +6,12 @@ void InitPageDirectory(struct PageDirectory_Entry_4KB* pd)
         pd[i].present = 0;
 }
 
+void InitPageTable(struct PageTable_Entry* pt)
+{
+    for(uint16_t i = 0; i < 1024; i++)
+        pt[i].present = 0;
+}
+
 void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, struct PageTable_Entry* pt, bool user_supervisor, bool read_write)
 {
     pd[index].page_size = 0;

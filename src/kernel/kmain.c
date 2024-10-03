@@ -35,14 +35,14 @@ physical_address_t VirtualAddressToPhysical(virtual_address_t address);
 virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 
 #include "IO/io.h"
-#include "IO/ps2.h"
+#include "PS2/ps2.h"
 #include "debug/out.h"
 
 #include "GDT/gdt.h"
 #include "IDT/idt.h"
 #include "IDT/int.h"
 #include "IDT/PIC.h"
-#include "IO/ps2kb.h"
+#include "PS2/ps2kb.h"
 #include "IO/textio.h"
 #include "PIT/pit.h"
 
@@ -60,11 +60,16 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 
 // ---------------------------------------------------------------
 
+struct PageTable_Entry page_table_0[1024] __attribute__((aligned(4096)));
+struct PageTable_Entry page_table_768_1023[256 * 1024] __attribute__((aligned(4096)));
+
+// ---------------------------------------------------------------
+
 #include "GDT/gdt.c"
 #include "IDT/idt.c"
 #include "IDT/int.c"
 #include "IDT/PIC.c"
-#include "IO/ps2kb.c"
+#include "PS2/ps2kb.c"
 #include "IO/textio.c"
 #include "PIT/pit.c"
 
@@ -74,6 +79,7 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 #include "klibc/string.c"
 
 #include "paging/paging.c"
+#include "multitasking/task.c"
 
 #include "mmanager/page_frame_allocator.c"
 
@@ -82,9 +88,6 @@ void Halt()
     LOG("WARN", "Kernel halted");
     _halt();
 }
-
-struct PageTable_Entry page_table_0[1024] __attribute__((aligned(4096)));
-struct PageTable_Entry page_table_768_1023[256 * 1024] __attribute__((aligned(4096)));
 
 void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 {
@@ -105,7 +108,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     LOG("INFO", "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
 
-    uint32_t maxKernelSize = (~(uint32_t)&_kernelStart) + 1;
+    uint32_t maxKernelSize = (uint32_t)(-(uint32_t)&_kernelStart);
     if (kernelSize >= maxKernelSize)
     {
         LOG("CRITICAL", "Kernel is too big (max %uB)", maxKernelSize); 
@@ -248,7 +251,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         while(true) *(char*)(0xb8000) = 'C';
     }
 
-    struct Task taskA = CreateTask("Task A", (uint32_t)&A, 0b00), taskB = CreateTask("Task B", (uint32_t)&B, 0b11), taskC = CreateTask("Task C", (uint32_t)&C, 0b00);
+    struct Task taskA = CreateTask("Task A", (uint32_t)&A, 0b00), taskB = CreateTask("Task B", (uint32_t)&B, 0b00), taskC = CreateTask("Task C", (uint32_t)&C, 0b00);
     InitMultitasking(&taskA);
     AddTask(&taskB);
     AddTask(&taskC);

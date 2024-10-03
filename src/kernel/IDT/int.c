@@ -33,7 +33,7 @@ uint32_t InterruptHandler(struct IntRegisters params)
 {
     if(params.interruptNumber < 32)            // Fault
     {
-        LOG("ERROR", "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
+        LOG("ERROR", "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x ; cr2 = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode, params.cr2);
 
         if (currentTask->ring == 0b00)
             kernelPanic(params);
