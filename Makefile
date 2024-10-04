@@ -3,7 +3,7 @@ ASM := nasm
 CFLAGS := -std=gnu99 -nostdlib -ffreestanding -Wall -masm=intel -m32 # -O3 -lgcc
 DATE := `date +"%Y-%m-%d"`
 
-all: horizonos.iso
+all: src/tasks/bin/A.elf src/tasks/bin/B.elf horizonos.iso
 
 run: horizonos.iso
 	qemu-system-i386                               		\
@@ -17,8 +17,8 @@ run: horizonos.iso
 	-usb                                           		\
 	-vga std 
 
-horizonos.iso: src/kernel/kernelentry.asm Makefile rmBin
-	tar -czvf bin/initrd.tar src/initrd/
+horizonos.iso: Makefile src/kernel/kernelentry.asm rmBin
+	tar -cvf bin/initrd.tar src/initrd/
 
 	$(ASM) -f elf32 -o "bin/kernelentry.o" "src/kernel/kernelentry.asm"
 	$(ASM) -f elf32 -o "bin/gdt.o" "src/kernel/GDT/gdt.asm"
@@ -36,6 +36,14 @@ horizonos.iso: src/kernel/kernelentry.asm Makefile rmBin
 	cp bin/initrd.tar root/boot/initrd.tar
 	 
 	grub-mkrescue -o horizonos.iso root
+
+src/tasks/bin/A.elf: Makefile
+	$(ASM) -f elf32 -o "src/tasks/bin/A.elf" "src/tasks/src/A/main.asm"
+	cp src/tasks/bin/A.elf src/initrd/A.elf
+
+src/tasks/bin/B.elf: Makefile
+	$(ASM) -f elf32 -o "src/tasks/bin/B.elf" "src/tasks/src/B/main.asm"
+	cp src/tasks/bin/B.elf src/initrd/B.elf
 
 rmBin:
 	rm -rf bin/*

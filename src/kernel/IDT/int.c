@@ -39,8 +39,6 @@ uint32_t InterruptHandler(struct IntRegisters params)
             kernelPanic(params);
         else
             KillCurrentTask(&params);
-        
-        ReturnFromISR();
     }
     else if(params.interruptNumber < 32 + 16)  // IRQ
     {
@@ -76,8 +74,10 @@ uint32_t InterruptHandler(struct IntRegisters params)
         }
 
         PIC_SendEOI(irqNumber);
-
-        ReturnFromISR();
+    }
+    else if (params.interruptNumber == 0xff) // System call
+    {
+        kputc((char)params.eax);
     }
     ReturnFromISR();
 }
