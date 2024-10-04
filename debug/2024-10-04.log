@@ -2,6 +2,7 @@
 0000-00-00 	 00:00:00,000 	 INFO 	Memory block : address : 0x0 ; length : 654336
 0000-00-00 	 00:00:00,000 	 INFO 	Memory block : address : 0x100000 ; length : 267255808
 0000-00-00 	 00:00:00,000 	 INFO 	Detected 267910144 bytes of usable memory
+0000-00-00 	 00:00:00,000 	 INFO 	Initrd loaded at address 0xc0225000 (10241 bytes long)
 0000-00-00 	 00:00:00,000 	 INFO 	Loaded the GDT
 0000-00-00 	 00:00:00,000 	 INFO 	Loaded the IDT
 0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIC
@@ -40,3 +41,22 @@
 0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
 0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
 0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task A"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task B"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "Task C"

@@ -58,6 +58,8 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 
 #include "klibc/reset.h"
 
+#include "initrd/initrd.h"
+
 // ---------------------------------------------------------------
 
 struct PageTable_Entry page_table_0[1024] __attribute__((aligned(4096)));
@@ -128,21 +130,27 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         kabort();
     }
 
-    for(uint32_t i = 0; i < multibootInfo->mmap_length; i += sizeof(multiboot_memory_map_t)) 
+    for (uint32_t i = 0; i < multibootInfo->mmap_length; i += sizeof(multiboot_memory_map_t)) 
     {
         multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(multibootInfo->mmap_addr + i);
         physical_address_t addr = ((physical_address_t)mmmt->addr_high << 8) | mmmt->addr_low;
         uint32_t len = mmmt->len_low;
-        if(mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) 
+        if (mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) 
         {
             LOG("INFO", "Memory block : address : 0x%lx ; length : %u", addr, len);
             availableMem += len;
-        }
+        }   
     }
 
     LOG("INFO", "Detected %u bytes of usable memory", availableMem); 
 
     kprintf(" | Done (%u bytes found)\n", availableMem);
+
+    multiboot_module_t* initrd = (multiboot_module_t*)multibootInfo->mods_addr;
+    initrd_address = PhysicalAddressToVirtual((physical_address_t)initrd->mod_start);
+    initrd_size = initrd->mod_end - initrd->mod_start;
+
+    LOG("INFO", "Initrd loaded at address 0x%x (%u bytes long)", initrd_address, initrd_size);
 
     kprintf("Loading a GDT...");
     kmemset(&GDT[0], 0, sizeof(struct GDT_Entry));   // NULL Descriptor
