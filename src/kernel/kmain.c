@@ -85,6 +85,8 @@ struct PageTable_Entry page_table_768_1023[256 * 1024] __attribute__((aligned(40
 
 #include "mmanager/page_frame_allocator.c"
 
+#include "initrd/initrd.c"
+
 void Halt()
 {
     LOG("WARN", "Kernel halted");
@@ -242,6 +244,8 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         LOG("INFO", "Block : 0x%lx ; %u pages", usable_memory_layout[i].address, usable_memory_layout[i].page_count);  
 
     SetupMemAllocations();
+
+    Initrd_ListFiles();
 
     void A()
     {
