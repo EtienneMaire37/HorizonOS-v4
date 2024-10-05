@@ -43,6 +43,25 @@ void KillTask(struct Task* task)
     task->previousTask->nextTask = task->nextTask;
     task->nextTask->previousTask = task->previousTask;
 
+    for(uint16_t i = 0; i < 768; i++)
+    {
+        struct PageDirectory_Entry_4KB pde = task->page_directory_ptr[i];
+        if ((*(uint32_t*)&pde) & 1)
+        {
+            struct PageTable_Entry* page_table = (struct PageTable_Entry*)PhysicalAddressToVirtual((*(uint32_t*)&pde) & 0xfffff000);
+            for(uint16_t j = (i == 0 ? 256 : 0); j < 1024; j++)
+            {
+                struct PageTable_Entry pte = page_table[j];
+                if ((*(uint32_t*)&pte) & 1)
+                {
+                    void* page = (void*)PhysicalAddressToVirtual((*(uint32_t*)&pte) & 0xfffff000);
+                    FreePage(page);
+                }
+            }
+            FreePage(page_table);
+        }
+    }
+
     FreePage(task->page_directory_ptr);
 
     taskCount--;
