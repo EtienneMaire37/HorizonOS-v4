@@ -71,6 +71,7 @@ void kprintf_u(uint32_t val)
 
 void kprintf_x(uint64_t val, uint8_t padding)
 {
+	if (padding == 0xff) padding = 0;
 	bool first0 = true;
 	uint8_t off = 60;
 	for(uint8_t i = 0; i < 16; i++)
@@ -86,6 +87,7 @@ void kprintf_x(uint64_t val, uint8_t padding)
 
 void kprintf_X(uint64_t val, uint8_t padding)
 {
+	if (padding == 0xff) padding = 0;
 	bool first0 = true;
 	uint8_t off = 60;
 	for(uint8_t i = 0; i < 16; i++)
