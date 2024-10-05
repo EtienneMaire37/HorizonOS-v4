@@ -19,7 +19,14 @@ struct Task CreateTask(char* name, virtual_address_t address, uint8_t ring)
 
     for (uint16_t i = 768; i < 1023; i++)
         AddPageTable(task.page_directory_ptr, i, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
-    AddPageTable(task.page_directory_ptr, 0, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_table_0), PAGING_SUPERVISOR_LEVEL, true);  
+    
+    struct PageTable_Entry* pt_0 = AllocatePage();
+    for(uint16_t i = 0; i < 256; i++)
+        SetPage(pt_0, i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+    for(uint16_t i = 255; i < 1024; i++)
+        RemovePage(pt_0, i);
+    
+    AddPageTable(task.page_directory_ptr, 0, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)pt_0), PAGING_SUPERVISOR_LEVEL, true);  
  
     task.registers.ebp = (uint32_t)&task.stack[STACK_SIZE - 1];
     task.registers.esp = task.registers.ebp;
