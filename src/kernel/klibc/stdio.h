@@ -34,9 +34,7 @@ void kputs(char* str);
 
 void kprintf_d(int32_t val);
 void kprintf_u(uint32_t val);
-void kprintf_x(uint32_t val);
-void kprintf_X(uint32_t val);
+void kprintf_x(uint64_t val, uint8_t padding);
+void kprintf_X(uint64_t val, uint8_t padding);
 void kfprintf(kFILE* file, char* fmt, ...);
 void kgets(char* str);
-
-extern void kprintf(char* fmt, ...);

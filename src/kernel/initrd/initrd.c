@@ -25,3 +25,17 @@ void Initrd_ListFiles()
         count++;
     }
 }
+
+INITRD_FILE* Initrd_GetFileInfo(char* file)
+{
+    struct TAR_Header* header = (struct TAR_Header*)initrd_address;
+    while (header->filename[0] != 0)
+    {
+        if (kstrcmp(file, header->filename) == 0)
+            return header;
+        uint32_t fileSize = Initrd_GetFileSize(header);
+        uint32_t blocks = (fileSize + 511) / 512;
+        header = &header[blocks + 1];
+    }
+    return NULL;
+}

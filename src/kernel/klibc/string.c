@@ -46,18 +46,18 @@ void* kmemset(void* ptr, int value, size_t count)
     return ptr;
 }
 
-int kstrcmp(const char* str1, const char* str2)
+int kstrcmp(const char *str1, const char *str2)
 {
-    while(*str1 != 0 && *str2 != 0)
-    {
-        if (*str1 != *str2)
-            return *str1 - *str2;
+    const unsigned char *p1 = (const unsigned char *)str1;
+    const unsigned char *p2 = (const unsigned char *)str2;
 
-        str1++;
-        str2++;
+    while (*p1 && (*p1 == *p2)) 
+    {
+        p1++; 
+        p2++; 
     }
 
-    return 0; 
+    return (*p1 > *p2) - (*p2 > *p1);
 }
 
 uint32_t kstrlen(char* str)

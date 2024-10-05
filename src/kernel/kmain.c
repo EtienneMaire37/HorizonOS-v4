@@ -247,6 +247,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     Initrd_ListFiles();
 
+    // INITRD_FILE* f = Initrd_GetFileInfo("src/initrd/A.elf");
+    // uint8_t* stream = (uint8_t*)(&(f[1]));
+    // LOG("INFO", "%s : %02X %02X %02X %02X %02X %02X %02X %02X", f->filename, 
+    //     stream[0], stream[1], stream[2], stream[3], 
+    //     stream[4], stream[5], stream[6], stream[7]);
+
     void A()
     {
         while(true) *(char*)(0xb8000) = 'A';
