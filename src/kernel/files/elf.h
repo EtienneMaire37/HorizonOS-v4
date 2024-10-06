@@ -80,6 +80,36 @@ struct ELF32_SectionHeader_Entry
 #define ELF32_PH_FLAG_WRITEABLE     2
 #define ELF32_PH_FLAG_READABLE      4
 
+
+#define ELF32_SH_TYPE_NULL              0x00
+#define ELF32_SH_TYPE_PROG_DATA         0x01
+#define ELF32_SH_TYPE_SYMBOL_TABLE      0x02
+#define ELF32_SH_TYPE_STRING_TABLE      0x03
+#define ELF32_SH_TYPE_REL_ADDENDS       0x04
+#define ELF32_SH_TYPE_HASH_TABLE        0x05
+#define ELF32_SH_TYPE_DYNAMIC           0x06
+#define ELF32_SH_TYPE_NOTE              0x07
+#define ELF32_SH_TYPE_BSS               0x08
+#define ELF32_SH_TYPE_REL               0x09
+#define ELF32_SH_TYPE_DYNSYM            0x0b
+#define ELF32_SH_TYPE_CONSTRUCTORS      0x0e
+#define ELF32_SH_TYPE_DESTRUCTORS       0x0f
+#define ELF32_SH_TYPE_PRECONSTRUCTORS   0x10
+#define ELF32_SH_TYPE_GROUP             0x11
+#define ELF32_SH_TYPE_SYMTAB_IDX        0x12
+#define ELF32_SH_TYPE_NUM               0x13
+
+#define ELF32_SH_FLAG_WRITEABLE         0x1
+#define ELF32_SH_FLAG_ALLOC             0x2
+#define ELF32_SH_FLAG_EXECUTABLE        0x4
+#define ELF32_SH_FLAG_MERGE             0x10
+#define ELF32_SH_FLAG_STRINGS           0x20
+#define ELF32_SH_FLAG_INFO_LINK         0x40
+#define ELF32_SH_FLAG_LINK_ORDER        0x80
+#define ELF32_SH_FLAG_NONCONFORMING     0x100
+#define ELF32_SH_FLAG_GROUP             0x200
+#define ELF32_SH_FLAG_TLS               0x400
+
 char* elf_type[5] = 
 {
     "Unknown", "Relocatable file", "Executable file", "Shared object", "Core file"

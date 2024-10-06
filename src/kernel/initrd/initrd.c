@@ -19,7 +19,7 @@ void Initrd_ListFiles()
     while (header->filename[0] != 0)
     {
         uint32_t fileSize = Initrd_GetFileSize(header);
-        LOG("INFO", "File %u : %s | size : %uB", count, &header->filename[0], fileSize);
+        LOG("INFO", "   File %u : %s | size : %uB", count, &header->filename[0], fileSize);
         uint32_t blocks = (fileSize + 511) / 512;
         header = &header[blocks + 1];
         count++;

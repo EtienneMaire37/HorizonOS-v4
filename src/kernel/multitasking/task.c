@@ -44,7 +44,7 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
     INITRD_FILE* f = Initrd_GetFileInfo(filename);
     if(!f) 
     {
-        LOG("ERROR", "Couldn't find file");
+        LOG("ERROR", "  Couldn't find file");
         kabort();
     }
     uint8_t* stream = (uint8_t*)(&(f[1]));
@@ -53,13 +53,13 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
 
     bool supported = true;
 
-    LOG("INFO", "ELF Version: %u", header->elf_version);
-    LOG("INFO", "ABI: %s", elf_abi[header->abi]);
-    LOG("INFO", "Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
-    LOG("INFO", "Type: %s", elf_type[header->type % 5]);
-    LOG("INFO", "CPU: %s", elf_machine[header->machine]);
-    LOG("INFO", "Endianness: %s", header->endianness == ELF32_LITTLE_ENDIAN ? "Little Endian" : "Big Endian");
-    LOG("INFO", "Entry point: 0x%x", header->entry);
+    LOG("INFO", "   ELF Version: %u", header->elf_version);
+    LOG("INFO", "   ABI: %s", elf_abi[header->abi]);
+    LOG("INFO", "   Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
+    LOG("INFO", "   Type: %s", elf_type[header->type % 5]);
+    LOG("INFO", "   CPU: %s", elf_machine[header->machine]);
+    LOG("INFO", "   Endianness: %s", header->endianness == ELF32_LITTLE_ENDIAN ? "Little Endian" : "Big Endian");
+    LOG("INFO", "   Entry point: 0x%x", header->entry);
 
     supported &= header->elf[0] == 0x7f;
     supported &= header->elf[1] == 0x45;
@@ -75,20 +75,20 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
 
     if(!supported) 
     {
-        LOG("ERROR", "ELF file not supported");
+        LOG("ERROR", "  ELF file not supported");
         kabort();
     }
 
-    LOG("INFO", "Program header : %u entries", header->ph_num);
+    LOG("INFO", "   Program header : %u entries", header->ph_num);
 
     for (uint16_t i = 0; i < header->ph_num; i++)
     {
         struct ELF32_ProgramHeader_Entry* ph = &((struct ELF32_ProgramHeader_Entry*)&stream[header->ph_off])[i];
 
-        LOG("INFO", "Section : off: 0x%x ; vaddr: 0x%x", ph->seg_off, ph->seg_vaddr);
+        LOG("INFO", "       Section : off: 0x%x ; vaddr: 0x%x", ph->seg_off, ph->seg_vaddr);
     }
 
-    LOG("INFO", "Section header : %u entries", header->sh_num);
+    LOG("INFO", "   Section header : %u entries", header->sh_num);
 
     struct ELF32_SectionHeader_Entry* shstrtab = &((struct ELF32_SectionHeader_Entry*)&stream[header->sh_off])[header->sh_str_idx]; 
 
@@ -96,7 +96,8 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
     {
         struct ELF32_SectionHeader_Entry* sh = &((struct ELF32_SectionHeader_Entry*)&stream[header->sh_off])[i];
 
-        LOG("INFO", "Section %s : off: 0x%x ; addr: 0x%x", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address);
+        if (sh->type != ELF32_SH_TYPE_NULL)
+            LOG("INFO", "       Section %s : off: 0x%x ; addr: 0x%x", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address);
     }
 
     if (header->entry != 0)

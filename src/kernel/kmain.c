@@ -135,6 +135,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         kabort();
     }
 
+    LOG("INFO", "Memory map:");
     for (uint32_t i = 0; i < multibootInfo->mmap_length; i += sizeof(multiboot_memory_map_t)) 
     {
         multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(multibootInfo->mmap_addr + i);
@@ -142,7 +143,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         uint32_t len = mmmt->len_low;
         if (mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) 
         {
-            LOG("INFO", "Memory block : address : 0x%lx ; length : %u", addr, len);
+            LOG("INFO", "   Memory block : address : 0x%lx ; length : %u", addr, len);
             availableMem += len;
         }   
     }
