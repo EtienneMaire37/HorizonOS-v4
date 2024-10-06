@@ -1,6 +1,6 @@
 #pragma once
 
-struct Task CreateTask(char* name, virtual_address_t address, uint8_t ring)
+struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring)
 {
     if (ring != 0b11) ring = 0b00;
 
@@ -11,7 +11,7 @@ struct Task CreateTask(char* name, virtual_address_t address, uint8_t ring)
 
     task.registers.cs = TaskCodeSegment(task);
     task.registers.ds = TaskDataSegment(task);
-    task.registers.eip = address;
+    task.registers.eip = entry;
     task.registers.eflags = (1 << 9);  // Interrupt enable
 
     task.page_directory_ptr = AllocatePage();
@@ -51,7 +51,56 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
 
     struct ELF32_Header* header = (struct ELF32_Header*)stream;
 
-    // LOG("INFO", "Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
+    bool supported = true;
+
+    LOG("INFO", "ELF Version: %u", header->elf_version);
+    LOG("INFO", "ABI: %s", elf_abi[header->abi]);
+    LOG("INFO", "Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
+    LOG("INFO", "Type: %s", elf_type[header->type % 5]);
+    LOG("INFO", "CPU: %s", elf_machine[header->machine]);
+    LOG("INFO", "Endianness: %s", header->endianness == ELF32_LITTLE_ENDIAN ? "Little Endian" : "Big Endian");
+    LOG("INFO", "Entry point: 0x%x", header->entry);
+
+    supported &= header->elf[0] == 0x7f;
+    supported &= header->elf[1] == 0x45;
+    supported &= header->elf[2] == 0x4c;
+    supported &= header->elf[3] == 0x46;
+    supported &= header->elf_version == 1;
+    supported &= header->abi == ELF32_ABI_SYSTEM_V;
+    supported &= header->architecture == ELF32_ARCHITECTURE_32;
+    // supported &= header->type == ELF32_TYPE_EXECUTABLE; 
+    supported &= header->machine == ELF32_MACHINE_X86;
+    supported &= header->endianness == ELF32_LITTLE_ENDIAN;
+    // supported &= header->entry != 0;
+
+    if(!supported) 
+    {
+        LOG("ERROR", "ELF file not supported");
+        kabort();
+    }
+
+    LOG("INFO", "Program header : %u entries", header->ph_num);
+
+    for (uint16_t i = 0; i < header->ph_num; i++)
+    {
+        struct ELF32_ProgramHeader_Entry* ph = &((struct ELF32_ProgramHeader_Entry*)&stream[header->ph_off])[i];
+
+        LOG("INFO", "Section : off: 0x%x ; vaddr: 0x%x", ph->seg_off, ph->seg_vaddr);
+    }
+
+    LOG("INFO", "Section header : %u entries", header->sh_num);
+
+    struct ELF32_SectionHeader_Entry* shstrtab = &((struct ELF32_SectionHeader_Entry*)&stream[header->sh_off])[header->sh_str_idx]; 
+
+    for (uint16_t i = 0; i < header->sh_num; i++)
+    {
+        struct ELF32_SectionHeader_Entry* sh = &((struct ELF32_SectionHeader_Entry*)&stream[header->sh_off])[i];
+
+        LOG("INFO", "Section %s : off: 0x%x ; addr: 0x%x", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address);
+    }
+
+    if (header->entry != 0)
+        task.registers.eip = header->entry;
 
     return task;
 }
