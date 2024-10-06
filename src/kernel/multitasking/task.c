@@ -103,7 +103,7 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
                     uint32_t address = sh->address + 4096 * j;
                     struct VirtualAddressLayout layout = *(struct VirtualAddressLayout*)&address;
                     void* page = CreateNewPage(&task, layout.page_directory_entry, layout.page_table_entry, ring == 0 ? PAGING_SUPERVISOR_LEVEL : PAGING_USER_LEVEL);
-                    kmemcpy(page, &stream[sh->offset + j * 4096], size & 0xfff);
+                    kmemcpy(page, &stream[sh->offset + j * 4096], min(size, 4096));
                 }
             }
         }
