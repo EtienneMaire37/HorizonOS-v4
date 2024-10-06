@@ -252,6 +252,9 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     SetupMemAllocations();
 
+    for(uint8_t i = 0; i < 64; i++)
+        AllocatePhysicalPage();
+
     Initrd_ListFiles();
 
     struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00);
@@ -259,6 +262,5 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     InitMultitasking(&taskA);
     AddTask(&taskB);
     
-    // EnableMultitasking();
-    while(true);
+    EnableMultitasking();
 }

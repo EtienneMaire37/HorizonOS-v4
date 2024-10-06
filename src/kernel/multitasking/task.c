@@ -6,8 +6,9 @@ struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring)
 
     struct Task task;
     task.ring = ring;
-    kmemcpy(&task.name[0], name, min(63, kstrlen(name) + 1));
-    task.name[63] = 0;
+    // kmemcpy(&task.name[0], name, min(63, kstrlen(name) + 1));
+    // task.name[63] = 0;
+    task.name = name;
 
     task.registers.cs = TaskCodeSegment(task);
     task.registers.ds = TaskDataSegment(task);
@@ -27,11 +28,12 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
 {
     LOG("INFO", "Loading \"%s\"", filename);
     struct Task task = CreateTask(filename, 0, ring);
+    // LOG("INFO", "Loading \"%s\"", filename);
 
     INITRD_FILE* f = Initrd_GetFileInfo(filename);
     if(!f) 
     {
-        LOG("ERROR", "  Couldn't find file");
+        LOG("ERROR", "   Couldn't find file \"%s\"", filename);
         kabort();
     }
     uint8_t* stream = (uint8_t*)(&(f[1]));
@@ -62,7 +64,7 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
 
     if(!supported) 
     {
-        LOG("ERROR", "  ELF file not supported");
+        LOG("ERROR", "   ELF file not supported");
         kabort();
     }
 
@@ -84,7 +86,27 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
         struct ELF32_SectionHeader_Entry* sh = &((struct ELF32_SectionHeader_Entry*)&stream[header->sh_off])[i];
 
         if (sh->type != ELF32_SH_TYPE_NULL)
-            LOG("INFO", "       Section %s : off: 0x%x ; addr: 0x%x", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address);
+        {
+            LOG("INFO", "       Section %s : off: 0x%x ; addr: 0x%x ; allocated : %s", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address, (sh->flags & ELF32_SH_FLAG_ALLOC) != 0 ? "true" : "false");
+            if (sh->flags & ELF32_SH_FLAG_ALLOC)
+            {
+                if (sh->address & 0xfff)
+                {
+                    LOG("ERROR", "Kernel doesn't support non page aligned sections for now");
+                    kabort();
+                }
+
+                uint32_t pages = (sh->size + 4095) / 4096;
+                uint32_t size = sh->size;
+                for(uint32_t j = 0; j < pages; j++, size -= 4096)
+                {
+                    uint32_t address = sh->address + 4096 * j;
+                    struct VirtualAddressLayout layout = *(struct VirtualAddressLayout*)&address;
+                    void* page = CreateNewPage(&task, layout.page_directory_entry, layout.page_table_entry, ring == 0 ? PAGING_SUPERVISOR_LEVEL : PAGING_USER_LEVEL);
+                    kmemcpy(page, &stream[sh->offset + j * 4096], size & 0xfff);
+                }
+            }
+        }
     }
 
     if (header->entry != 0)
@@ -209,17 +231,18 @@ void CreateNewPageTable(struct Task* task, uint16_t index, uint8_t user_supervis
     AddPageTable(task->page_directory_ptr, index, pt_address, user_supervisor, true);  
 }
 
-void CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_index, uint8_t user_supervisor)
+void* CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_index, uint8_t user_supervisor)
 {
     if (task->page_directory_ptr[page_table_index].present == 0)
         CreateNewPageTable(task, page_table_index, PAGING_USER_LEVEL);
-    struct PageTable_Entry* page_table = (struct PageTable_Entry*)(task->page_directory_ptr[page_table_index].address << 12);
+
+    struct PageTable_Entry* page_table = (struct PageTable_Entry*)PhysicalAddressToVirtual(task->page_directory_ptr[page_table_index].address << 12);
     if (page_table[page_index].present == 1)
     {
         LOG("CRITICAL", "Kernel tried to allocate an already existing page");
         kabort();
     }
     physical_address_t page_address = AllocatePhysicalPage();
-    // struct PageTable_Entry* pte = (struct PageTable_Entry*)PhysicalAddressToVirtual(pt_address);
     SetPage(page_table, page_index, page_address, user_supervisor, true);  
+    return (struct PageTable_Entry*)PhysicalAddressToVirtual(page_address);
 }

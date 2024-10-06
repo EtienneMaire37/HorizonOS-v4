@@ -17,9 +17,9 @@
 0000-00-00 	 00:00:00,000 	 INFO 	Usable memory layout :
 0000-00-00 	 00:00:00,000 	 INFO 	Block : 0x22c000 ; 64947 pages
 0000-00-00 	 00:00:00,000 	 INFO 	Initrd files : 
-0000-00-00 	 00:00:00,000 	 INFO 	   File 0 : src/initrd/ | size : 0B
-0000-00-00 	 00:00:00,000 	 INFO 	   File 1 : src/initrd/A.elf | size : 4448B
-0000-00-00 	 00:00:00,000 	 INFO 	   File 2 : src/initrd/B.elf | size : 4448B
+0000-00-00 	 00:00:00,000 	 INFO 	   File 0 : "src/initrd/" | size : 0B
+0000-00-00 	 00:00:00,000 	 INFO 	   File 1 : "src/initrd/A.elf" | size : 4448B
+0000-00-00 	 00:00:00,000 	 INFO 	   File 2 : "src/initrd/B.elf" | size : 4448B
 0000-00-00 	 00:00:00,000 	 INFO 	Loading "src/initrd/A.elf"
 0000-00-00 	 00:00:00,000 	 INFO 	   ELF Version: 1
 0000-00-00 	 00:00:00,000 	 INFO 	   ABI: System V
@@ -31,10 +31,10 @@
 0000-00-00 	 00:00:00,000 	 INFO 	   Program header : 1 entries
 0000-00-00 	 00:00:00,000 	 INFO 	       Section : off: 0x1000 ; vaddr: 0x100000
 0000-00-00 	 00:00:00,000 	 INFO 	   Section header : 5 entries
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x1000 ; addr: 0x100000
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x100c ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x104c ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x1079 ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x1000 ; addr: 0x100000 ; allocated : true
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x100c ; addr: 0x0 ; allocated : false
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x104c ; addr: 0x0 ; allocated : false
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x1079 ; addr: 0x0 ; allocated : false
 0000-00-00 	 00:00:00,000 	 INFO 	Loading "src/initrd/B.elf"
 0000-00-00 	 00:00:00,000 	 INFO 	   ELF Version: 1
 0000-00-00 	 00:00:00,000 	 INFO 	   ABI: System V
@@ -46,7 +46,115 @@
 0000-00-00 	 00:00:00,000 	 INFO 	   Program header : 1 entries
 0000-00-00 	 00:00:00,000 	 INFO 	       Section : off: 0x1000 ; vaddr: 0x100000
 0000-00-00 	 00:00:00,000 	 INFO 	   Section header : 5 entries
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x1000 ; addr: 0x100000
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x100c ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x104c ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x1079 ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x1000 ; addr: 0x100000 ; allocated : true
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x100c ; addr: 0x0 ; allocated : false
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x104c ; addr: 0x0 ; allocated : false
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x1079 ; addr: 0x0 ; allocated : false
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Switched to task "src/initrd/B.elf"

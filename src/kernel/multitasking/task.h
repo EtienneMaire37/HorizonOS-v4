@@ -4,7 +4,7 @@
 
 struct Task
 {
-    char name[64];
+    char* name;
     struct IntRegisters registers;
     uint8_t stack[STACK_SIZE];
     struct PageDirectory_Entry_4KB* page_directory_ptr;
@@ -36,4 +36,6 @@ void EnableMultitasking();
 void TaskSwitch(struct IntRegisters* params);
 void FreeVirtualAddressSpace(struct Task* task);
 void CreateNewVirtualAddressSpace(struct Task* task);
+void CreateNewPageTable(struct Task* task, uint16_t index, uint8_t user_supervisor);
+void* CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_index, uint8_t user_supervisor);
 void KillCurrentTask(struct IntRegisters* params);
