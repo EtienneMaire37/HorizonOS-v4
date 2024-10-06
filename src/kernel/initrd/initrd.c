@@ -3,10 +3,10 @@
 uint32_t Initrd_GetFileSize(struct TAR_Header* header)
 {
     uint32_t size = 0;
-    uint32_t count = 1;
+    uint32_t count = 1073741824;    // 8^10
 
-    for (uint8_t j = 11; j > 0; j--, count *= 8)
-        size += ((header->size[j - 1] - '0') * count);
+    for (uint8_t j = 0; j < 10; j++, count >>= 3)
+        size += ((header->size[j] - '0') * count);
 
     return size;
 }

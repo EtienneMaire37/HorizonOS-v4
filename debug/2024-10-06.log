@@ -1,0 +1,25 @@
+0000-00-00 	 00:00:00,000 	 INFO 	Kernel loaded at address 0xc0101000 - 0xc0222000 (1183744 bytes long)
+0000-00-00 	 00:00:00,000 	 INFO 	Memory block : address : 0x0 ; length : 654336
+0000-00-00 	 00:00:00,000 	 INFO 	Memory block : address : 0x100000 ; length : 267255808
+0000-00-00 	 00:00:00,000 	 INFO 	Detected 267910144 bytes of usable memory
+0000-00-00 	 00:00:00,000 	 INFO 	Initrd loaded at address 0xc0225000 (10240 bytes long)
+0000-00-00 	 00:00:00,000 	 INFO 	Loaded the GDT
+0000-00-00 	 00:00:00,000 	 INFO 	Loaded the IDT
+0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIC
+0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIT
+0000-00-00 	 00:00:00,000 	 INFO 	Initialized the keyboard
+0000-00-00 	 00:00:00,000 	 INFO 	Setting up paging
+0000-00-00 	 00:00:00,000 	 INFO 	Enabled interrupts
+0000-00-00 	 00:00:00,000 	 INFO 	First page after kernel : 0x228000
+0000-00-00 	 00:00:00,000 	 INFO 	Available pages : 64951
+0000-00-00 	 00:00:00,000 	 INFO 	Usable memory : 266039296 bytes
+0000-00-00 	 00:00:00,000 	 INFO 	Usable memory layout :
+0000-00-00 	 00:00:00,000 	 INFO 	Block : 0x228000 ; 64951 pages
+0000-00-00 	 00:00:00,000 	 INFO 	Initrd files : 
+0000-00-00 	 00:00:00,000 	 INFO 	File 0 : src/initrd/ | size : 0B
+0000-00-00 	 00:00:00,000 	 INFO 	File 1 : src/initrd/A.elf | size : 464B
+0000-00-00 	 00:00:00,000 	 INFO 	File 2 : src/initrd/B.elf | size : 464B
+0000-00-00 	 00:00:00,000 	 INFO 	Loading "src/initrd/A.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Architecture: 32bit
+0000-00-00 	 00:00:00,000 	 INFO 	Loading "src/initrd/B.elf"
+0000-00-00 	 00:00:00,000 	 INFO 	Architecture: 32bit

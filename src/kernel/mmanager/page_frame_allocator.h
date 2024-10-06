@@ -25,5 +25,7 @@ uint32_t GetPageIndex(physical_address_t address);
 void PFA_SetPage(uint32_t index, bool isFree);
 bool PFA_GetPage(uint32_t index);
 void SetupMemAllocations();
+physical_address_t AllocatePhysicalPage();
+void FreePhysicalPage(physical_address_t address);
 void* AllocatePage();
 void FreePage(void* page);

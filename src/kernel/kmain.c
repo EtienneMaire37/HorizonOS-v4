@@ -17,7 +17,7 @@ extern uint8_t stack_top;
 
 extern uint8_t _kernelStart;
 extern uint8_t _kernelEnd;
-physical_address_t kEndAddress;
+physical_address_t usableMemoryAddress;
 uint32_t kernelSize;
 
 uint32_t availableMem = 0;
@@ -57,6 +57,9 @@ virtual_address_t PhysicalAddressToVirtual(physical_address_t address);
 #include "multitasking/task.h"
 
 #include "klibc/reset.h"
+
+#include "files/tar.h"
+#include "files/elf.h"
 
 #include "initrd/initrd.h"
 
@@ -105,7 +108,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     multibootInfo = _multibootInfo;
 
     kernelSize = &_kernelEnd - &_kernelStart;
-    kEndAddress = VirtualAddressToPhysical((virtual_address_t)&_kernelEnd);
+    usableMemoryAddress = VirtualAddressToPhysical((virtual_address_t)&_kernelEnd);
 
     ClearScreen(' ');
     ResetCursor();
@@ -153,6 +156,9 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     initrd_size = initrd->mod_end - initrd->mod_start;
 
     LOG("INFO", "Initrd loaded at address 0x%x (%u bytes long)", initrd_address, initrd_size);
+
+    if (initrd->mod_start + initrd_size > usableMemoryAddress)
+        usableMemoryAddress = initrd->mod_start + initrd_size;
 
     kprintf("Loading a GDT...");
     kmemset(&GDT[0], 0, sizeof(struct GDT_Entry));   // NULL Descriptor
@@ -247,30 +253,11 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     Initrd_ListFiles();
 
-    // INITRD_FILE* f = Initrd_GetFileInfo("src/initrd/A.elf");
-    // uint8_t* stream = (uint8_t*)(&(f[1]));
-    // LOG("INFO", "%s : %02X %02X %02X %02X %02X %02X %02X %02X", f->filename, 
-    //     stream[0], stream[1], stream[2], stream[3], 
-    //     stream[4], stream[5], stream[6], stream[7]);
-
-    void A()
-    {
-        while(true) *(char*)(0xb8000) = 'A';
-    }
-
-    void B()
-    {
-        while(true) *(char*)(0xb8000) = 'B';
-    }
-
-    void C()
-    {
-        while(true) *(char*)(0xb8000) = 'C';
-    }
-
-    struct Task taskA = CreateTask("Task A", (uint32_t)&A, 0b00), taskB = CreateTask("Task B", (uint32_t)&B, 0b00), taskC = CreateTask("Task C", (uint32_t)&C, 0b00);
+    struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00);
+    
     InitMultitasking(&taskA);
     AddTask(&taskB);
-    AddTask(&taskC);
-    EnableMultitasking();
+    
+    // EnableMultitasking();
+    while(true);
 }

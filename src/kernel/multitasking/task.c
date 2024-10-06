@@ -36,6 +36,26 @@ struct Task CreateTask(char* name, virtual_address_t address, uint8_t ring)
     return task;
 }  
 
+struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
+{
+    LOG("INFO", "Loading \"%s\"", filename);
+    struct Task task = CreateTask(filename, 0, ring);
+
+    INITRD_FILE* f = Initrd_GetFileInfo(filename);
+    if(!f) 
+    {
+        LOG("ERROR", "Couldn't find file");
+        kabort();
+    }
+    uint8_t* stream = (uint8_t*)(&(f[1]));
+
+    struct ELF32_Header* header = (struct ELF32_Header*)stream;
+
+    // LOG("INFO", "Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
+
+    return task;
+}
+
 void AddTask(struct Task* task)
 {
     firstTask->previousTask->nextTask = task;
@@ -62,11 +82,10 @@ void KillTask(struct Task* task)
                 struct PageTable_Entry pte = page_table[j];
                 if ((*(uint32_t*)&pte) & 1)
                 {
-                    void* page = (void*)PhysicalAddressToVirtual((*(uint32_t*)&pte) & 0xfffff000);
-                    FreePage(page);
+                    FreePhysicalPage(((*(uint32_t*)&pte) & 0xfffff000));
                 }
             }
-            FreePage(page_table);
+            FreePhysicalPage(((*(uint32_t*)&pde) & 0xfffff000));
         }
     }
 

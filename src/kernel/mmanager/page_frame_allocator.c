@@ -78,17 +78,16 @@ bool DetectFirstAvailablePage()
  
         if (mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) 
         {
-            if (kEndAddress >= addr && kEndAddress < addr + len)
+            if (usableMemoryAddress >= addr && usableMemoryAddress < addr + len)
             {
-                physical_address_t address = (kEndAddress + 4096) & 0xfffff000;
+                physical_address_t address = (usableMemoryAddress + 4096) & 0xfffff000;
                 if(IsPageValid(address))
                 {
                     first_page_after_kernel = address;
                     return true;
                 }
-                return false;
             }
-            else if (kEndAddress <= addr)
+            else if (usableMemoryAddress <= addr)
             {
                 physical_address_t address = (addr + 4096) & 0xfffff000;
                 if(IsPageValid(address))
@@ -96,7 +95,6 @@ bool DetectFirstAvailablePage()
                     first_page_after_kernel = address;
                     return true;
                 }
-                return false;
             }
         }
     }
@@ -219,26 +217,36 @@ void SetupMemAllocations()
         PFA_SetPage(i, true);
 }
 
-void* AllocatePage()
+physical_address_t AllocatePhysicalPage()
 {
     for (uint32_t i = 0; i < available_pages; i++)
     {
         if (PFA_GetPage(i)) // Page is free
         {
             PFA_SetPage(i, false);
-            return (void*)PhysicalAddressToVirtual(GetPageAddress(i));
+            return GetPageAddress(i);
         }
     }
-    return NULL;
+    return 0;
 }
 
-void FreePage(void* page)
+void* AllocatePage()
 {
-    uint32_t index = GetPageIndex(VirtualAddressToPhysical((virtual_address_t)page));
+    return (void*)PhysicalAddressToVirtual(AllocatePhysicalPage());
+}
+
+void FreePhysicalPage(physical_address_t address)
+{
+    uint32_t index = GetPageIndex(address);
     if (PFA_GetPage(index))
     {
         LOG("CRITICAL", "Kernel tried to free an already free page");
         kabort();
     }
     PFA_SetPage(index, true);
+}
+
+void FreePage(void* page)
+{
+    FreePhysicalPage(VirtualAddressToPhysical((virtual_address_t)page));
 }

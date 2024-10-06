@@ -46,7 +46,7 @@ void* kmemset(void* ptr, int value, size_t count)
     return ptr;
 }
 
-int kstrcmp(const char *str1, const char *str2)
+int kstrcmp(const char* str1, const char* str2)
 {
     const unsigned char *p1 = (const unsigned char *)str1;
     const unsigned char *p2 = (const unsigned char *)str2;
