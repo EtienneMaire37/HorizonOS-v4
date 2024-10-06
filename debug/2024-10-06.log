@@ -3,7 +3,7 @@
 0000-00-00 	 00:00:00,000 	 INFO 	   Memory block : address : 0x0 ; length : 654336
 0000-00-00 	 00:00:00,000 	 INFO 	   Memory block : address : 0x100000 ; length : 267255808
 0000-00-00 	 00:00:00,000 	 INFO 	Detected 267910144 bytes of usable memory
-0000-00-00 	 00:00:00,000 	 INFO 	Initrd loaded at address 0xc0226000 (10240 bytes long)
+0000-00-00 	 00:00:00,000 	 INFO 	Initrd loaded at address 0xc0226000 (20480 bytes long)
 0000-00-00 	 00:00:00,000 	 INFO 	Loaded the GDT
 0000-00-00 	 00:00:00,000 	 INFO 	Loaded the IDT
 0000-00-00 	 00:00:00,000 	 INFO 	Initialized the PIC
@@ -11,40 +11,42 @@
 0000-00-00 	 00:00:00,000 	 INFO 	Initialized the keyboard
 0000-00-00 	 00:00:00,000 	 INFO 	Setting up paging
 0000-00-00 	 00:00:00,000 	 INFO 	Enabled interrupts
-0000-00-00 	 00:00:00,000 	 INFO 	First page after kernel : 0x229000
-0000-00-00 	 00:00:00,000 	 INFO 	Available pages : 64950
-0000-00-00 	 00:00:00,000 	 INFO 	Usable memory : 266035200 bytes
+0000-00-00 	 00:00:00,000 	 INFO 	First page after kernel : 0x22c000
+0000-00-00 	 00:00:00,000 	 INFO 	Available pages : 64947
+0000-00-00 	 00:00:00,000 	 INFO 	Usable memory : 266022912 bytes
 0000-00-00 	 00:00:00,000 	 INFO 	Usable memory layout :
-0000-00-00 	 00:00:00,000 	 INFO 	Block : 0x229000 ; 64950 pages
+0000-00-00 	 00:00:00,000 	 INFO 	Block : 0x22c000 ; 64947 pages
 0000-00-00 	 00:00:00,000 	 INFO 	Initrd files : 
 0000-00-00 	 00:00:00,000 	 INFO 	   File 0 : src/initrd/ | size : 0B
-0000-00-00 	 00:00:00,000 	 INFO 	   File 1 : src/initrd/A.elf | size : 464B
-0000-00-00 	 00:00:00,000 	 INFO 	   File 2 : src/initrd/B.elf | size : 464B
+0000-00-00 	 00:00:00,000 	 INFO 	   File 1 : src/initrd/A.elf | size : 4448B
+0000-00-00 	 00:00:00,000 	 INFO 	   File 2 : src/initrd/B.elf | size : 4448B
 0000-00-00 	 00:00:00,000 	 INFO 	Loading "src/initrd/A.elf"
 0000-00-00 	 00:00:00,000 	 INFO 	   ELF Version: 1
 0000-00-00 	 00:00:00,000 	 INFO 	   ABI: System V
 0000-00-00 	 00:00:00,000 	 INFO 	   Architecture: 32bit
-0000-00-00 	 00:00:00,000 	 INFO 	   Type: Relocatable file
+0000-00-00 	 00:00:00,000 	 INFO 	   Type: Executable file
 0000-00-00 	 00:00:00,000 	 INFO 	   CPU: x86
 0000-00-00 	 00:00:00,000 	 INFO 	   Endianness: Little Endian
-0000-00-00 	 00:00:00,000 	 INFO 	   Entry point: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	   Program header : 0 entries
+0000-00-00 	 00:00:00,000 	 INFO 	   Entry point: 0x100000
+0000-00-00 	 00:00:00,000 	 INFO 	   Program header : 1 entries
+0000-00-00 	 00:00:00,000 	 INFO 	       Section : off: 0x1000 ; vaddr: 0x100000
 0000-00-00 	 00:00:00,000 	 INFO 	   Section header : 5 entries
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x110 ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x120 ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x150 ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x1a0 ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x1000 ; addr: 0x100000
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x100c ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x104c ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x1079 ; addr: 0x0
 0000-00-00 	 00:00:00,000 	 INFO 	Loading "src/initrd/B.elf"
 0000-00-00 	 00:00:00,000 	 INFO 	   ELF Version: 1
 0000-00-00 	 00:00:00,000 	 INFO 	   ABI: System V
 0000-00-00 	 00:00:00,000 	 INFO 	   Architecture: 32bit
-0000-00-00 	 00:00:00,000 	 INFO 	   Type: Relocatable file
+0000-00-00 	 00:00:00,000 	 INFO 	   Type: Executable file
 0000-00-00 	 00:00:00,000 	 INFO 	   CPU: x86
 0000-00-00 	 00:00:00,000 	 INFO 	   Endianness: Little Endian
-0000-00-00 	 00:00:00,000 	 INFO 	   Entry point: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	   Program header : 0 entries
+0000-00-00 	 00:00:00,000 	 INFO 	   Entry point: 0x100000
+0000-00-00 	 00:00:00,000 	 INFO 	   Program header : 1 entries
+0000-00-00 	 00:00:00,000 	 INFO 	       Section : off: 0x1000 ; vaddr: 0x100000
 0000-00-00 	 00:00:00,000 	 INFO 	   Section header : 5 entries
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x110 ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x120 ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x150 ; addr: 0x0
-0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x1a0 ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .text : off: 0x1000 ; addr: 0x100000
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .symtab : off: 0x100c ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .strtab : off: 0x104c ; addr: 0x0
+0000-00-00 	 00:00:00,000 	 INFO 	       Section .shstrtab : off: 0x1079 ; addr: 0x0

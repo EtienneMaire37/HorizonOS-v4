@@ -38,11 +38,13 @@ horizonos.iso: Makefile src/kernel/kernelentry.asm rmBin
 	grub-mkrescue -o horizonos.iso root
 
 src/tasks/bin/A.elf: Makefile
-	$(ASM) -f elf32 -o "src/tasks/bin/A.elf" "src/tasks/src/A/main.asm"
+	$(ASM) -f elf32 -o "src/tasks/bin/A.o" "src/tasks/src/A/main.asm"
+	ld -T src/tasks/src/A/link.ld -m elf_i386 
 	cp src/tasks/bin/A.elf src/initrd/A.elf
 
 src/tasks/bin/B.elf: Makefile
-	$(ASM) -f elf32 -o "src/tasks/bin/B.elf" "src/tasks/src/B/main.asm"
+	$(ASM) -f elf32 -o "src/tasks/bin/B.o" "src/tasks/src/B/main.asm"
+	ld -T src/tasks/src/B/link.ld -m elf_i386 
 	cp src/tasks/bin/B.elf src/initrd/B.elf
 
 rmBin:
