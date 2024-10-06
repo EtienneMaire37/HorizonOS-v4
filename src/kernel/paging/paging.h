@@ -57,7 +57,7 @@ struct PageDirectory_Entry_4KB  page_directory[1024] __attribute__((aligned(4096
 
 void InitPageDirectory(struct PageDirectory_Entry_4KB* pd);
 void InitPageTable(struct PageTable_Entry* pt);
-void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, struct PageTable_Entry* pt, bool user_supervisor, bool read_write);
+void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, physical_address_t pt_address, bool user_supervisor, bool read_write);
 void RemovePageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index);
 void RemovePage(struct PageTable_Entry* pt, uint16_t index);
 void SetPage(struct PageTable_Entry* pt, uint16_t index, physical_address_t address, bool user_supervisor, bool read_write);

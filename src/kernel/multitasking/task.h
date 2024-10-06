@@ -34,4 +34,6 @@ void KillTask(struct Task* task);
 void InitMultitasking(struct Task* task);
 void EnableMultitasking();
 void TaskSwitch(struct IntRegisters* params);
+void FreeVirtualAddressSpace(struct Task* task);
+void CreateNewVirtualAddressSpace(struct Task* task);
 void KillCurrentTask(struct IntRegisters* params);

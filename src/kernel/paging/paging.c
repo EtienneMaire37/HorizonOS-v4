@@ -12,12 +12,12 @@ void InitPageTable(struct PageTable_Entry* pt)
         pt[i].present = 0;
 }
 
-void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, struct PageTable_Entry* pt, bool user_supervisor, bool read_write)
+void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, physical_address_t pt_address, bool user_supervisor, bool read_write)
 {
     pd[index].page_size = 0;
     pd[index].cache_disable = 0;
     pd[index].write_through = 0;
-    pd[index].address = (((uint32_t)pt) >> 12);
+    pd[index].address = (((uint32_t)pt_address) >> 12);
     pd[index].user_supervisor = user_supervisor;
     pd[index].read_write = read_write;
     pd[index].present = 1;

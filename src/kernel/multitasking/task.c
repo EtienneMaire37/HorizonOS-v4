@@ -14,21 +14,8 @@ struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring)
     task.registers.eip = entry;
     task.registers.eflags = (1 << 9);  // Interrupt enable
 
-    task.page_directory_ptr = AllocatePage();
-    InitPageDirectory(task.page_directory_ptr);
-    task.registers.cr3 = (uint32_t)VirtualAddressToPhysical((virtual_address_t)task.page_directory_ptr);
+    CreateNewVirtualAddressSpace(&task);
 
-    for (uint16_t i = 768; i < 1023; i++)
-        AddPageTable(task.page_directory_ptr, i, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
-    
-    struct PageTable_Entry* pt_0 = AllocatePage();
-    for(uint16_t i = 0; i < 256; i++)
-        SetPage(pt_0, i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
-    for(uint16_t i = 256; i < 1024; i++)
-        RemovePage(pt_0, i);
-
-    AddPageTable(task.page_directory_ptr, 0, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)pt_0), PAGING_SUPERVISOR_LEVEL, true);  
- 
     task.registers.ebp = (uint32_t)&task.stack[STACK_SIZE - 1];
     task.registers.esp = task.registers.ebp;
     task.registers.currEsp = task.registers.ebp;
@@ -68,10 +55,10 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
     supported &= header->elf_version == 1;
     supported &= header->abi == ELF32_ABI_SYSTEM_V;
     supported &= header->architecture == ELF32_ARCHITECTURE_32;
-    // supported &= header->type == ELF32_TYPE_EXECUTABLE; 
+    supported &= header->type == ELF32_TYPE_EXECUTABLE; 
     supported &= header->machine == ELF32_MACHINE_X86;
     supported &= header->endianness == ELF32_LITTLE_ENDIAN;
-    // supported &= header->entry != 0;
+    supported &= header->entry != 0;
 
     if(!supported) 
     {
@@ -121,25 +108,7 @@ void KillTask(struct Task* task)
     task->previousTask->nextTask = task->nextTask;
     task->nextTask->previousTask = task->previousTask;
 
-    for(uint16_t i = 0; i < 768; i++)
-    {
-        struct PageDirectory_Entry_4KB pde = task->page_directory_ptr[i];
-        if ((*(uint32_t*)&pde) & 1)
-        {
-            struct PageTable_Entry* page_table = (struct PageTable_Entry*)PhysicalAddressToVirtual((*(uint32_t*)&pde) & 0xfffff000);
-            for(uint16_t j = (i == 0 ? 256 : 0); j < 1024; j++)
-            {
-                struct PageTable_Entry pte = page_table[j];
-                if ((*(uint32_t*)&pte) & 1)
-                {
-                    FreePhysicalPage(((*(uint32_t*)&pte) & 0xfffff000));
-                }
-            }
-            FreePhysicalPage(((*(uint32_t*)&pde) & 0xfffff000));
-        }
-    }
-
-    FreePage(task->page_directory_ptr);
+    FreeVirtualAddressSpace(task);
 
     taskCount--;
 }
@@ -183,4 +152,74 @@ void KillCurrentTask(struct IntRegisters* params)
 
     KillTask(currentTask);
     TaskSwitch(params);
+}
+
+void CreateNewVirtualAddressSpace(struct Task* task)
+{
+    task->page_directory_ptr = AllocatePage();
+    InitPageDirectory(task->page_directory_ptr);
+    task->registers.cr3 = (uint32_t)VirtualAddressToPhysical((virtual_address_t)task->page_directory_ptr);
+
+    for (uint16_t i = 768; i < 1023; i++)
+        AddPageTable(task->page_directory_ptr, i, VirtualAddressToPhysical((virtual_address_t)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
+
+    physical_address_t pt_0_address = AllocatePhysicalPage();
+    struct PageTable_Entry* pt_0 = (struct PageTable_Entry*)PhysicalAddressToVirtual(pt_0_address);
+    for(uint16_t i = 0; i < 256; i++)
+        SetPage(pt_0, i, i * 4096, PAGING_SUPERVISOR_LEVEL, true);
+    for(uint16_t i = 256; i < 1024; i++)
+        RemovePage(pt_0, i);
+
+    AddPageTable(task->page_directory_ptr, 0, pt_0_address, PAGING_SUPERVISOR_LEVEL, true);  
+}
+
+void FreeVirtualAddressSpace(struct Task* task)
+{
+    for(uint16_t i = 0; i < 768; i++)
+    {
+        struct PageDirectory_Entry_4KB pde = task->page_directory_ptr[i];
+        if ((*(uint32_t*)&pde) & 1)
+        {
+            struct PageTable_Entry* page_table = (struct PageTable_Entry*)PhysicalAddressToVirtual((*(uint32_t*)&pde) & 0xfffff000);
+            for(uint16_t j = (i == 0 ? 256 : 0); j < 1024; j++)
+            {
+                struct PageTable_Entry pte = page_table[j];
+                if ((*(uint32_t*)&pte) & 1)
+                {
+                    FreePhysicalPage(((*(uint32_t*)&pte) & 0xfffff000));
+                }
+            }
+            FreePhysicalPage(((*(uint32_t*)&pde) & 0xfffff000));
+        }
+    }
+
+    FreePage(task->page_directory_ptr);
+}
+
+void CreateNewPageTable(struct Task* task, uint16_t index, uint8_t user_supervisor)
+{
+    if (task->page_directory_ptr[index].present == 1)
+    {
+        LOG("CRITICAL", "Kernel tried to allocate an already existing page table");
+        kabort();
+    }
+    physical_address_t pt_address = AllocatePhysicalPage();
+    struct PageTable_Entry* pt = (struct PageTable_Entry*)PhysicalAddressToVirtual(pt_address);
+    InitPageTable(pt);
+    AddPageTable(task->page_directory_ptr, index, pt_address, user_supervisor, true);  
+}
+
+void CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_index, uint8_t user_supervisor)
+{
+    if (task->page_directory_ptr[page_table_index].present == 0)
+        CreateNewPageTable(task, page_table_index, PAGING_USER_LEVEL);
+    struct PageTable_Entry* page_table = (struct PageTable_Entry*)(task->page_directory_ptr[page_table_index].address << 12);
+    if (page_table[page_index].present == 1)
+    {
+        LOG("CRITICAL", "Kernel tried to allocate an already existing page");
+        kabort();
+    }
+    physical_address_t page_address = AllocatePhysicalPage();
+    // struct PageTable_Entry* pte = (struct PageTable_Entry*)PhysicalAddressToVirtual(pt_address);
+    SetPage(page_table, page_index, page_address, user_supervisor, true);  
 }

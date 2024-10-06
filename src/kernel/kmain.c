@@ -223,9 +223,9 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     }
 
     for (uint16_t i = 769; i < 1023; i++)
-        AddPageTable(page_directory, i, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
+        AddPageTable(page_directory, i, VirtualAddressToPhysical((virtual_address_t)&page_table_768_1023[(i - 768) * 1024]), PAGING_SUPERVISOR_LEVEL, true);  
 
-    AddPageTable(page_directory, 1023, (struct PageTable_Entry*)(uint32_t)VirtualAddressToPhysical((virtual_address_t)&page_directory), PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
+    AddPageTable(page_directory, 1023, VirtualAddressToPhysical((virtual_address_t)&page_directory), PAGING_SUPERVISOR_LEVEL, true);    // Setup recursive mapping
 
     ReloadPageDirectory();
 
