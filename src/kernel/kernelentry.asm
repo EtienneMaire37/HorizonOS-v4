@@ -6,19 +6,6 @@ FLAGS equ (ALIGNMENT | MEMINFO)
 MAGIC equ 0x1BADB002
 CHECKSUM equ -(MAGIC + FLAGS)
 
-%macro CALL_LOWER_HALF 1
-	mov edx, %1
-    sub edx, 0xc0000000
-	call edx
-%endmacro
-
-%macro DEBUG_A 0
-	mov al, 'A'
- 	mov ah, 0x0f
- 	mov [0xb8000], ax
- 	jmp $
-%endmacro
-
 section .multiboot.data
 dd MAGIC
 dd FLAGS

@@ -46,3 +46,14 @@ void SetPage(struct PageTable_Entry* pt, uint16_t index, physical_address_t addr
     pt[index].read_write = read_write;
     pt[index].present = 1;
 } 
+
+void SetPageByAddress(struct PageDirectory_Entry_4KB* pd, virtual_address_t vaddress, physical_address_t paddress, bool user_supervisor, bool read_write)
+{
+
+}
+
+void RemovePageByAddress(struct PageDirectory_Entry_4KB* pd, virtual_address_t vaddress)
+{
+    struct VirtualAddressLayout* layout = (struct VirtualAddressLayout*)&vaddress;
+    RemovePage((struct PageTable_Entry*)(pd[layout->page_directory_entry].address << 12), layout->page_table_entry);
+}

@@ -1,33 +1,36 @@
 #pragma once
 
-struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring)
+struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring, bool system)
 {
+    ring = 0b00;    // ! for now because i cant solve a bug with ring 3
+
     if (ring != 0b11) ring = 0b00;
 
     struct Task task;
-    task.ring = ring;
+    task.flags = ring;
+    task.flags |= (system << 2);
     // kmemcpy(&task.name[0], name, min(63, kstrlen(name) + 1));
     // task.name[63] = 0;
     task.name = name;
 
     task.registers.cs = TaskCodeSegment(task);
-    task.registers.ds = TaskDataSegment(task);
+    task.registers.ss = TaskDataSegment(task);
     task.registers.eip = entry;
     task.registers.eflags = (1 << 9);  // Interrupt enable
 
     CreateNewVirtualAddressSpace(&task);
 
-    task.registers.ebp = (uint32_t)&task.stack[STACK_SIZE - 1];
+    task.registers.ebp = (uint32_t)task.stack + 4092 - sizeof(struct IntRegisters);
     task.registers.esp = task.registers.ebp;
-    task.registers.currEsp = task.registers.ebp;
+    task.registers.currEsp = task.registers.ebp + sizeof(struct IntRegisters);
 
     return task;
 }  
 
-struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
+struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 {
     LOG("INFO", "Loading \"%s\"", filename);
-    struct Task task = CreateTask(filename, 0, ring);
+    struct Task task = CreateTask(filename, 0, ring, system);
     // LOG("INFO", "Loading \"%s\"", filename);
 
     INITRD_FILE* f = Initrd_GetFileInfo(filename);
@@ -102,7 +105,7 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring)
                 {
                     uint32_t address = sh->address + 4096 * j;
                     struct VirtualAddressLayout layout = *(struct VirtualAddressLayout*)&address;
-                    void* page = CreateNewPage(&task, layout.page_directory_entry, layout.page_table_entry, ring == 0 ? PAGING_SUPERVISOR_LEVEL : PAGING_USER_LEVEL);
+                    void* page = CreateNewPage(&task, layout.page_directory_entry, layout.page_table_entry, TaskPagingPrivilege(task));
                     kmemcpy(page, &stream[sh->offset + j * 4096], min(size, 4096));
                 }
             }
@@ -127,6 +130,8 @@ void AddTask(struct Task* task)
 
 void KillTask(struct Task* task)
 {
+    LOG("INFO", "Killing task \"%s\"", currentTask->name);
+        
     task->previousTask->nextTask = task->nextTask;
     task->nextTask->previousTask = task->previousTask;
 
@@ -162,7 +167,8 @@ void TaskSwitch(struct IntRegisters* params)
         currentTask = currentTask->nextTask;
         *params = currentTask->registers;
         
-        TSS.esp0 = currentTask->registers.esp - sizeof(struct IntRegisters);
+        // TSS.esp0 = currentTask->registers.esp - sizeof(struct IntRegisters);
+        TSS.esp0 = currentTask->registers.currEsp;
 
         LOG("INFO", "Switched to task \"%s\"", currentTask->name);
     }
@@ -170,14 +176,15 @@ void TaskSwitch(struct IntRegisters* params)
 
 void KillCurrentTask(struct IntRegisters* params)
 {
-    LOG("INFO", "Killing task \"%s\"", currentTask->name);
-
     KillTask(currentTask);
     TaskSwitch(params);
 }
 
 void CreateNewVirtualAddressSpace(struct Task* task)
 {
+    task->stack = AllocatePage();
+    // RemovePageByAddress(task->page_directory_ptr, (virtual_address_t)task->stack);
+
     task->page_directory_ptr = AllocatePage();
     InitPageDirectory(task->page_directory_ptr);
     task->registers.cr3 = (uint32_t)VirtualAddressToPhysical((virtual_address_t)task->page_directory_ptr);
@@ -197,6 +204,8 @@ void CreateNewVirtualAddressSpace(struct Task* task)
 
 void FreeVirtualAddressSpace(struct Task* task)
 {
+    FreePage(task->stack);
+
     for(uint16_t i = 0; i < 768; i++)
     {
         struct PageDirectory_Entry_4KB pde = task->page_directory_ptr[i];
@@ -234,7 +243,7 @@ void CreateNewPageTable(struct Task* task, uint16_t index, uint8_t user_supervis
 void* CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_index, uint8_t user_supervisor)
 {
     if (task->page_directory_ptr[page_table_index].present == 0)
-        CreateNewPageTable(task, page_table_index, PAGING_USER_LEVEL);
+        CreateNewPageTable(task, page_table_index, PAGING_SUPERVISOR_LEVEL);
 
     struct PageTable_Entry* page_table = (struct PageTable_Entry*)PhysicalAddressToVirtual(task->page_directory_ptr[page_table_index].address << 12);
     if (page_table[page_index].present == 1)
@@ -243,6 +252,8 @@ void* CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_
         kabort();
     }
     physical_address_t page_address = AllocatePhysicalPage();
+    // LOG("INFO", "Mapping page at virtual address : 0x%x, to physical address : 0x%lx with ring %u privilege",
+    //     (page_table_index * 4096 + page_index) * 4096, page_address, user_supervisor * 3);
     SetPage(page_table, page_index, page_address, user_supervisor, true);  
     return (struct PageTable_Entry*)PhysicalAddressToVirtual(page_address);
 }

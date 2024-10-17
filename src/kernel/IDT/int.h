@@ -12,7 +12,7 @@ struct IntRegisters
     uint32_t cs;
     uint32_t eflags;
     uint32_t currEsp;
-    uint32_t ds;
+    uint32_t ss;
 };
 
 char* errorString[32] = 
@@ -51,5 +51,5 @@ char* errorString[32] =
     ""
 };
 
-void kernelPanic(struct IntRegisters params);
+void KernelPanic(struct IntRegisters params);
 uint32_t InterruptHandler(struct IntRegisters params);

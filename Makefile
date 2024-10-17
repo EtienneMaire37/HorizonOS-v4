@@ -5,7 +5,7 @@ DATE := `date +"%Y-%m-%d"`
 
 all: src/tasks/bin/A.elf src/tasks/bin/B.elf horizonos.iso
 
-run: horizonos.iso
+run: all
 	qemu-system-i386                               		\
 	-accel tcg,thread=single                       		\
 	-cpu core2duo                                  		\
@@ -37,15 +37,25 @@ horizonos.iso: Makefile src/kernel/kernelentry.asm rmBin
 	 
 	grub-mkrescue -o horizonos.iso root
 
-src/tasks/bin/A.elf: Makefile
+src/tasks/bin/A.elf: Makefile src/tasks/src/A/main.asm src/tasks/src/A/link.ld
 	$(ASM) -f elf32 -o "src/tasks/bin/A.o" "src/tasks/src/A/main.asm"
 	ld -T src/tasks/src/A/link.ld -m elf_i386 
 	cp src/tasks/bin/A.elf src/initrd/A.elf
 
-src/tasks/bin/B.elf: Makefile
+src/tasks/bin/B.elf: Makefile src/tasks/src/B/main.asm src/tasks/src/B/link.ld
 	$(ASM) -f elf32 -o "src/tasks/bin/B.o" "src/tasks/src/B/main.asm"
 	ld -T src/tasks/src/B/link.ld -m elf_i386 
 	cp src/tasks/bin/B.elf src/initrd/B.elf
+
+pdclib: root/lib/libpdclib.a
+
+root/lib/libpdclib.a: root/lib/libpdclib.a
+	cd pdclib && cmake .
+	cd pdclib && make
+
+	mkdir root/lib
+	mv pdclib/libpdclib.a root/lib/
+	mv pdclib/libpdclib.so root/lib/
 
 rmBin:
 	rm -rf bin/*

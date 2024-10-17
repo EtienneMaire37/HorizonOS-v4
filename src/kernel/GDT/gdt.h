@@ -21,14 +21,21 @@ struct GDT_Entry
 
 struct TSS_Entry 
 {
-	uint32_t link;
+	uint16_t link;
+	uint16_t reserved0;
+
 	uint32_t esp0;     // The stack pointer to load when changing to kernel mode.
-	uint32_t ss0;      // The stack segment to load when changing to kernel mode.
-    
+	uint16_t ss0;      // The stack segment to load when changing to kernel mode.
+	uint16_t reserved1;
+
 	uint32_t esp1; 
-	uint32_t ss1;
+	uint16_t ss1;
+	uint16_t reserved2;
+
 	uint32_t esp2;
-	uint32_t ss2;
+	uint16_t ss2;
+	uint16_t reserved3;
+
 	uint32_t cr3;
 	uint32_t eip;
 	uint32_t eflags;
@@ -40,15 +47,26 @@ struct TSS_Entry
 	uint32_t ebp;
 	uint32_t esi;
 	uint32_t edi;
-	uint32_t es;
-	uint32_t cs;
-	uint32_t ss;
-	uint32_t ds;
-	uint32_t fs;
-	uint32_t gs;
-	uint32_t ldt;
-	uint16_t trap;
-	uint16_t iomap_base;
+
+	uint16_t es;
+	uint16_t reserved4;
+	uint16_t cs;
+	uint16_t reserved5;
+	uint16_t ss;
+	uint16_t reserved6;
+	uint16_t ds;
+	uint16_t reserved7;
+	uint16_t fs;
+	uint16_t reserved8;
+	uint16_t gs;
+	uint16_t reserved9;
+
+	uint16_t ldtr;
+	uint16_t reserved10;
+	uint16_t reserved11;
+	uint16_t iopb;
+
+	uint32_t ssp;
 } __attribute__((__packed__));
 
 #define TSS_TYPE_16BIT_TSS_AVL  0x1

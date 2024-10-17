@@ -81,12 +81,6 @@ INTTable:
     %assign i i+1 
     %endrep
 
-intEnd:
-    add esp, 8
-    iret 
-
-extern multitasking_code_segment
-extern multitasking_data_segment
 _InterruptHandler:
     pushad
 
@@ -110,4 +104,5 @@ _InterruptHandler:
 
     popad
 
-    jmp intEnd
+    add esp, 8
+    iret 

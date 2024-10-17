@@ -1,6 +1,6 @@
 #pragma once
 
-void kernelPanic(struct IntRegisters params)
+void KernelPanic(struct IntRegisters params)
 {
     DisableInterrupts();
 
@@ -35,10 +35,12 @@ uint32_t InterruptHandler(struct IntRegisters params)
     {
         LOG("ERROR", "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x ; cr2 = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode, params.cr2);
 
-        if (currentTask->ring == 0b00)
-            kernelPanic(params);
+        if ((currentTask->flags & TASK_FLAG_SYSTEM) || taskCount == 1)
+            KernelPanic(params);
         else
             KillCurrentTask(&params);
+
+        ReturnFromISR();
     }
     else if(params.interruptNumber < 32 + 16)  // IRQ
     {
@@ -74,10 +76,13 @@ uint32_t InterruptHandler(struct IntRegisters params)
         }
 
         PIC_SendEOI(irqNumber);
+
+        ReturnFromISR();
     }
     else if (params.interruptNumber == 0xff) // System call
     {
         kputc((char)params.eax);
+        ReturnFromISR();
     }
     ReturnFromISR();
 }

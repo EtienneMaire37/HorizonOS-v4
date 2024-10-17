@@ -163,15 +163,16 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     kprintf("Loading a GDT...");
     kmemset(&GDT[0], 0, sizeof(struct GDT_Entry));   // NULL Descriptor
-    SetupGDTEntry(&GDT[1], 0, 0xfffff, 0b10011010, 0b1100);  // Kernel mode code segment
-    SetupGDTEntry(&GDT[2], 0, 0xfffff, 0b10010010, 0b1100);  // Kernel mode data segment
-    SetupGDTEntry(&GDT[3], 0, 0xfffff, 0b11111010, 0b1100);  // User mode code segment
-    SetupGDTEntry(&GDT[4], 0, 0xfffff, 0b11110010, 0b1100);  // User mode data segment
+    SetupGDTEntry(&GDT[1], 0, 0xfffff, 0b10011011, 0b1100);  // Kernel mode code segment
+    SetupGDTEntry(&GDT[2], 0, 0xfffff, 0b10010011, 0b1100);  // Kernel mode data segment
+    SetupGDTEntry(&GDT[3], 0, 0xfffff, 0b11111011, 0b1100);  // User mode code segment
+    SetupGDTEntry(&GDT[4], 0, 0xfffff, 0b11110011, 0b1100);  // User mode data segment
     
     kmemset(&TSS, 0, sizeof(struct TSS_Entry));
+    TSS.iopb = sizeof(struct TSS_Entry);
     TSS.ss0 = KERNEL_DATA_SEGMENT;
     TSS.esp0 = (uint32_t)&stack_top;
-    SetupGDTEntry(&GDT[5], (uint32_t)&TSS, sizeof(struct TSS_Entry), 0b10000000 | TSS_TYPE_32BIT_TSS_AVL, 0b1100);  // TSS
+    SetupGDTEntry(&GDT[5], (uint32_t)&TSS, sizeof(struct TSS_Entry), 0b10000000 | TSS_TYPE_32BIT_TSS_AVL, 0b0100);  // TSS
     InstallGDT();
     LoadTSS();
     kprintf(" | Done\n");
@@ -252,12 +253,18 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     SetupMemAllocations();
 
-    for(uint8_t i = 0; i < 64; i++)
-        AllocatePhysicalPage();
-
     Initrd_ListFiles();
 
-    struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00);
+    struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
+
+    // LOG("INFO", "A ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
+    // LOG("INFO", "B ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
+
+    // LOG("INFO", "A pde 0 : 0x%x", *(uint32_t*)&taskA.page_directory_ptr[0]);
+    // LOG("INFO", "B pde 0 : 0x%x", *(uint32_t*)&taskB.page_directory_ptr[0]);
+
+    // LOG("INFO", "A pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256]);
+    // LOG("INFO", "B pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256]);
     
     InitMultitasking(&taskA);
     AddTask(&taskB);

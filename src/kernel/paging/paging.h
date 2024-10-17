@@ -61,6 +61,8 @@ void AddPageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index, physical_a
 void RemovePageTable(struct PageDirectory_Entry_4KB* pd, uint16_t index);
 void RemovePage(struct PageTable_Entry* pt, uint16_t index);
 void SetPage(struct PageTable_Entry* pt, uint16_t index, physical_address_t address, bool user_supervisor, bool read_write);
+void SetPageByAddress(struct PageDirectory_Entry_4KB* pd, virtual_address_t vaddress, physical_address_t paddress, bool user_supervisor, bool read_write);
+void RemovePageByAddress(struct PageDirectory_Entry_4KB* pd, virtual_address_t vaddress);
 
 extern void ReloadPageDirectory();
 extern void EnablePaging(); 
