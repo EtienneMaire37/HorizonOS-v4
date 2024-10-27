@@ -56,12 +56,12 @@ src/tasks/bin/hello_world.elf: Makefile root/lib/libpdclib.a
 pdclib: root/lib/libpdclib.a
 
 root/lib/libpdclib.a:
-	cd pdclib && cmake . -DUSE_THREADS=OFF -DCMAKE_BUILD_TYPE=Release
+	cd pdclib && cmake . -DUSE_THREADS=OFF -DCMAKE_BUILD_TYPE=Debug
 	cd pdclib && make
 
-	mkdir ./root/lib
-	mv pdclib/libpdclib.a root/lib/libpdclib.a
-	mv pdclib/libpdclib.so root/lib/libpdclib.so
+	mkdir ./root/lib -p
+	cp pdclib/libpdclib.a root/lib/libpdclib.a
+	cp pdclib/libpdclib.so root/lib/libpdclib.so
 
 rmBin:
 	rm -rf bin/*
