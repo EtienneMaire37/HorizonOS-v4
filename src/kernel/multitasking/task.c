@@ -67,7 +67,7 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 
     if(!supported) 
     {
-        LOG("ERROR", "   ELF file not supported");
+        LOG("ERROR", "ELF file not supported");
         kabort();
     }
 

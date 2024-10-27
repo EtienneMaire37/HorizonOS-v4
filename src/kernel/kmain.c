@@ -255,7 +255,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     Initrd_ListFiles();
 
-    struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
+    // struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
 
     // LOG("INFO", "A ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
     // LOG("INFO", "B ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
@@ -266,8 +266,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     // LOG("INFO", "A pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256]);
     // LOG("INFO", "B pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256]);
     
-    InitMultitasking(&taskA);
-    AddTask(&taskB);
+    // InitMultitasking(&taskA);
+    // AddTask(&taskB);
+
+    struct Task pdclib_hw = LoadTaskFromInitrd("src/initrd/hello_world.elf", 0b00, true);
+    
+    InitMultitasking(&pdclib_hw);
     
     EnableMultitasking();
 }
