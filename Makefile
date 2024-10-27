@@ -50,10 +50,8 @@ src/tasks/bin/B.elf: Makefile src/tasks/src/B/main.asm src/tasks/src/B/link.ld
 src/tasks/bin/hello_world.elf: Makefile root/lib/libpdclib.a
 	$(CC) -c "src/tasks/src/PDCLIB_hw/main.c" \
 	-o "src/tasks/bin/hello_world.elf" \
-	$(CFLAGS) -L"root/lib/" -I"pdclib/include" -I"pdclib/platform/horizonos/include" -lpdclib
+	$(CFLAGS) -L"root/lib/" -I"pdclib/include" -I"pdclib/platform/horizonos/include" -lpdclib -static
 	cp src/tasks/bin/hello_world.elf src/initrd/hello_world.elf
-
-pdclib: root/lib/libpdclib.a
 
 root/lib/libpdclib.a:
 	cd pdclib && cmake . -DUSE_THREADS=OFF -DCMAKE_BUILD_TYPE=Debug
@@ -65,7 +63,7 @@ root/lib/libpdclib.a:
 
 rmBin:
 	rm -rf bin/*
-	rm -rf root
+	# rm -rf root
 	rm -rf src/libc/lib/*
 	rm -rf initrd.tar
 
