@@ -3,6 +3,6 @@
 void kabort()
 {
     kprintf("\nKernel aborted.");
-    LOG("ERROR", "Kernel aborted")
+    LOG(ERROR, "Kernel aborted")
     Halt();
 }

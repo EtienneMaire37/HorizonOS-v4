@@ -50,7 +50,7 @@ src/tasks/bin/B.elf: Makefile src/tasks/src/B/main.asm src/tasks/src/B/link.ld
 src/tasks/bin/hello_world.elf: Makefile root/lib/libpdclib.a
 	$(CC) -c "src/tasks/src/PDCLIB_hw/main.c" \
 	-o "src/tasks/bin/hello_world.elf" \
-	$(CFLAGS) -L"root/lib/" -I"pdclib/include" -I"pdclib/platform/horizonos/include" -lpdclib -static
+	$(CFLAGS) -L"root/lib/" -I"pdclib/include" -I"pdclib/platform/horizonos/include" -lpdclib
 	cp src/tasks/bin/hello_world.elf src/initrd/hello_world.elf
 
 root/lib/libpdclib.a:

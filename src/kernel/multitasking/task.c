@@ -29,14 +29,13 @@ struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring, bool s
 
 struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 {
-    LOG("INFO", "Loading \"%s\"", filename);
+    LOG(INFO, "Loading \"%s\"", filename);
     struct Task task = CreateTask(filename, 0, ring, system);
-    // LOG("INFO", "Loading \"%s\"", filename);
 
     INITRD_FILE* f = Initrd_GetFileInfo(filename);
     if(!f) 
     {
-        LOG("ERROR", "   Couldn't find file \"%s\"", filename);
+        LOG(ERROR, "   Couldn't find file \"%s\"", filename);
         kabort();
     }
     uint8_t* stream = (uint8_t*)(&(f[1]));
@@ -45,13 +44,13 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 
     bool supported = true;
 
-    LOG("INFO", "   ELF Version: %u", header->elf_version);
-    LOG("INFO", "   ABI: %s", elf_abi[header->abi]);
-    LOG("INFO", "   Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
-    LOG("INFO", "   Type: %s", elf_type[header->type % 5]);
-    LOG("INFO", "   CPU: %s", elf_machine[header->machine]);
-    LOG("INFO", "   Endianness: %s", header->endianness == ELF32_LITTLE_ENDIAN ? "Little Endian" : "Big Endian");
-    LOG("INFO", "   Entry point: 0x%x", header->entry);
+    LOG(DEBUG, "   ELF Version: %u", header->elf_version);
+    LOG(DEBUG, "   ABI: %s", elf_abi[header->abi]);
+    LOG(DEBUG, "   Architecture: %ubit", header->architecture == ELF32_ARCHITECTURE_32 ? 32 : 64);
+    LOG(DEBUG, "   Type: %s", elf_type[header->type % 5]);
+    LOG(DEBUG, "   CPU: %s", elf_machine[header->machine]);
+    LOG(DEBUG, "   Endianness: %s", header->endianness == ELF32_LITTLE_ENDIAN ? "Little Endian" : "Big Endian");
+    LOG(DEBUG, "   Entry point: 0x%x", header->entry);
 
     supported &= header->elf[0] == 0x7f;
     supported &= header->elf[1] == 0x45;
@@ -67,20 +66,20 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 
     if(!supported) 
     {
-        LOG("ERROR", "ELF file not supported");
+        LOG(ERROR, "ELF file not supported");
         kabort();
     }
 
-    LOG("INFO", "   Program header : %u entries", header->ph_num);
+    LOG(DEBUG, "   Program header : %u entries", header->ph_num);
 
     for (uint16_t i = 0; i < header->ph_num; i++)
     {
         struct ELF32_ProgramHeader_Entry* ph = &((struct ELF32_ProgramHeader_Entry*)&stream[header->ph_off])[i];
 
-        LOG("INFO", "       Section : off: 0x%x ; vaddr: 0x%x", ph->seg_off, ph->seg_vaddr);
+        LOG(DEBUG, "       Section : off: 0x%x ; vaddr: 0x%x", ph->seg_off, ph->seg_vaddr);
     }
 
-    LOG("INFO", "   Section header : %u entries", header->sh_num);
+    LOG(DEBUG, "   Section header : %u entries", header->sh_num);
 
     struct ELF32_SectionHeader_Entry* shstrtab = &((struct ELF32_SectionHeader_Entry*)&stream[header->sh_off])[header->sh_str_idx]; 
 
@@ -90,12 +89,12 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 
         if (sh->type != ELF32_SH_TYPE_NULL)
         {
-            LOG("INFO", "       Section %s : off: 0x%x ; addr: 0x%x ; allocated : %s", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address, (sh->flags & ELF32_SH_FLAG_ALLOC) != 0 ? "true" : "false");
+            LOG(DEBUG, "       Section %s : off: 0x%x ; addr: 0x%x ; allocated : %s", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address, (sh->flags & ELF32_SH_FLAG_ALLOC) != 0 ? "true" : "false");
             if (sh->flags & ELF32_SH_FLAG_ALLOC)
             {
                 if (sh->address & 0xfff)
                 {
-                    LOG("ERROR", "Kernel doesn't support non page aligned sections for now");
+                    LOG(ERROR, "Kernel doesn't support non page aligned sections for now");
                     kabort();
                 }
 
@@ -130,7 +129,7 @@ void AddTask(struct Task* task)
 
 void KillTask(struct Task* task)
 {
-    LOG("INFO", "Killing task \"%s\"", currentTask->name);
+    LOG(INFO, "Killing task \"%s\"", currentTask->name);
         
     task->previousTask->nextTask = task->nextTask;
     task->nextTask->previousTask = task->previousTask;
@@ -170,7 +169,7 @@ void TaskSwitch(struct IntRegisters* params)
         // TSS.esp0 = currentTask->registers.esp - sizeof(struct IntRegisters);
         TSS.esp0 = currentTask->registers.currEsp;
 
-        LOG("INFO", "Switched to task \"%s\"", currentTask->name);
+        LOG(DEBUG, "Switched to task \"%s\"", currentTask->name);
     }
 }
 
@@ -231,7 +230,7 @@ void CreateNewPageTable(struct Task* task, uint16_t index, uint8_t user_supervis
 {
     if (task->page_directory_ptr[index].present == 1)
     {
-        LOG("CRITICAL", "Kernel tried to allocate an already existing page table");
+        LOG(CRITICAL, "Kernel tried to allocate an already existing page table");
         kabort();
     }
     physical_address_t pt_address = AllocatePhysicalPage();
@@ -248,7 +247,7 @@ void* CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_
     struct PageTable_Entry* page_table = (struct PageTable_Entry*)PhysicalAddressToVirtual(task->page_directory_ptr[page_table_index].address << 12);
     if (page_table[page_index].present == 1)
     {
-        LOG("CRITICAL", "Kernel tried to allocate an already existing page");
+        LOG(CRITICAL, "Kernel tried to allocate an already existing page");
         kabort();
     }
     physical_address_t page_address = AllocatePhysicalPage();

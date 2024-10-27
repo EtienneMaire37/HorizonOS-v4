@@ -22,7 +22,7 @@ void KernelPanic(struct IntRegisters params)
 
     kfprintf(kstdout, "cr2:  0x%x\n", params.cr2);
 
-    // LOG("ERROR", "Kernel panic : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
+    // LOG(ERROR, "Kernel panic : Exception number : %u ; Error : %s ; Error code = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode);
 
     Halt();
 }
@@ -33,7 +33,7 @@ uint32_t InterruptHandler(struct IntRegisters params)
 {
     if(params.interruptNumber < 32)            // Fault
     {
-        LOG("ERROR", "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x ; cr2 = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode, params.cr2);
+        LOG(ERROR, "Fault : Exception number : %u ; Error : %s ; Error code = 0x%x ; cr2 = 0x%x", params.interruptNumber, errorString[params.interruptNumber], params.errorCode, params.cr2);
 
         if ((currentTask->flags & TASK_FLAG_SYSTEM) || taskCount == 1)
             KernelPanic(params);
@@ -55,7 +55,7 @@ uint32_t InterruptHandler(struct IntRegisters params)
             ReturnFromISR();
         }
         
-        // LOG("INFO", "Interrupt %u handled", params.interruptNumber);
+        // LOG(INFO, "Interrupt %u handled", params.interruptNumber);
 
         switch (irqNumber)
         {

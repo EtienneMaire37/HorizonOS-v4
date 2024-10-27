@@ -210,7 +210,7 @@ void SetupMemAllocations()
 {
     memory_bitmap = (uint8_t*)PhysicalAddressToVirtual(first_page_after_kernel);
     uint8_t bitmap_length = ((available_pages + 7) / 8 + 4095) / 4096; // * In pages
-    // LOG("INFO", "Bitmap length : %u pages", bitmap_length);
+    // LOG(INFO, "Bitmap length : %u pages", bitmap_length);
     for (uint32_t i = 0; i < bitmap_length; i++)
         PFA_SetPage(i, false);
     for (uint32_t i = bitmap_length; i < available_pages; i++)
@@ -240,7 +240,7 @@ void FreePhysicalPage(physical_address_t address)
     uint32_t index = GetPageIndex(address);
     if (PFA_GetPage(index))
     {
-        LOG("CRITICAL", "Kernel tried to free an already free page");
+        LOG(CRITICAL, "Kernel tried to free an already free page");
         kabort();
     }
     PFA_SetPage(index, true);

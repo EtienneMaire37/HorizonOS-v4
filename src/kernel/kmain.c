@@ -92,7 +92,7 @@ struct PageTable_Entry page_table_768_1023[256 * 1024] __attribute__((aligned(40
 
 void Halt()
 {
-    LOG("WARN", "Kernel halted");
+    LOG(WARNING, "Kernel halted");
     _halt();
 }
 
@@ -113,12 +113,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     ClearScreen(' ');
     ResetCursor();
 
-    LOG("INFO", "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
+    LOG(INFO, "Kernel loaded at address 0x%x - 0x%x (%u bytes long)", &_kernelStart, &_kernelEnd, kernelSize); 
 
     uint32_t maxKernelSize = (uint32_t)(-(uint32_t)&_kernelStart);
     if (kernelSize >= maxKernelSize)
     {
-        LOG("CRITICAL", "Kernel is too big (max %uB)", maxKernelSize); 
+        LOG(CRITICAL, "Kernel is too big (max %uB)", maxKernelSize); 
         kabort();
     }
 
@@ -126,16 +126,16 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     if(magicNumber != MULTIBOOT_BOOTLOADER_MAGIC) 
     {
-        LOG("CRITICAL", "Invalid multiboot magic number (%x)", magicNumber);
+        LOG(CRITICAL, "Invalid multiboot magic number (%x)", magicNumber);
         kabort();
     }
     if(!((multibootInfo->flags >> 6) & 1)) 
     {
-        LOG("CRITICAL", "Invalid memory map");
+        LOG(CRITICAL, "Invalid memory map");
         kabort();
     }
 
-    LOG("INFO", "Memory map:");
+    LOG(INFO, "Memory map:");
     for (uint32_t i = 0; i < multibootInfo->mmap_length; i += sizeof(multiboot_memory_map_t)) 
     {
         multiboot_memory_map_t* mmmt = (multiboot_memory_map_t*)(multibootInfo->mmap_addr + i);
@@ -143,12 +143,12 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
         uint32_t len = mmmt->len_low;
         if (mmmt->type == MULTIBOOT_MEMORY_AVAILABLE) 
         {
-            LOG("INFO", "   Memory block : address : 0x%lx ; length : %u", addr, len);
+            LOG(INFO, "   Memory block : address : 0x%lx ; length : %u", addr, len);
             availableMem += len;
         }   
     }
 
-    LOG("INFO", "Detected %u bytes of usable memory", availableMem); 
+    LOG(INFO, "Detected %u bytes of usable memory", availableMem); 
 
     kprintf(" | Done (%u bytes found)\n", availableMem);
 
@@ -156,7 +156,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     initrd_address = PhysicalAddressToVirtual((physical_address_t)initrd->mod_start);
     initrd_size = initrd->mod_end - initrd->mod_start;
 
-    LOG("INFO", "Initrd loaded at address 0x%x (%u bytes long)", initrd_address, initrd_size);
+    LOG(DEBUG, "Initrd loaded at address 0x%x (%u bytes long)", initrd_address, initrd_size);
 
     if (initrd->mod_start + initrd_size > usableMemoryAddress)
         usableMemoryAddress = initrd->mod_start + initrd_size;
@@ -177,25 +177,25 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     LoadTSS();
     kprintf(" | Done\n");
 
-    LOG("INFO", "Loaded the GDT"); 
+    LOG(DEBUG, "Loaded the GDT"); 
 
     kprintf("Loading an IDT...");
     InstallIDT();
     kprintf(" | Done\n");
 
-    LOG("INFO", "Loaded the IDT"); 
+    LOG(DEBUG, "Loaded the IDT"); 
 
     kprintf("Initializing the PIC...");
     PIC_Remap(32, 32 + 8);
     kprintf(" | Done\n");
 
-    LOG("INFO", "Initialized the PIC"); 
+    LOG(DEBUG, "Initialized the PIC"); 
 
     kprintf("Initializing the PIT...");
     PIT_Channel0_SetFrequency(1000);
     kprintf(" | Done\n");
 
-    LOG("INFO", "Initialized the PIT"); 
+    LOG(DEBUG, "Initialized the PIT"); 
 
     kprintf("Initializing the keyboard...");
     kb_layout = KB_AZERTY;
@@ -204,9 +204,9 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     PS2_KB_SetScancodeSet(2);
     kprintf(" | Done\n");
 
-    LOG("INFO", "Initialized the keyboard"); 
+    LOG(DEBUG, "Initialized the keyboard"); 
 
-    LOG("INFO", "Setting up paging"); 
+    LOG(DEBUG, "Setting up paging"); 
 
     for (uint16_t i = 256; i < 1024; i++)
         RemovePage(&page_table_0[0], i);
@@ -231,25 +231,25 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     ReloadPageDirectory();
 
     EnableInterrupts(); 
-    LOG("INFO", "Enabled interrupts");  
+    LOG(DEBUG, "Enabled interrupts");  
 
     if(!DetectFirstAvailablePage())
     {
-        LOG("CRITICAL", "Not enough memory to run HorizonOS");
+        LOG(CRITICAL, "Not enough memory to run HorizonOS");
         kabort();
     }
 
     DetectRemainingPages();
 
-    LOG("INFO", "First page after kernel : 0x%x", first_page_after_kernel);  
-    LOG("INFO", "Available pages : %u", available_pages);  
+    LOG(DEBUG, "First page after kernel : 0x%x", first_page_after_kernel);  
+    LOG(INFO, "Available pages : %u", available_pages);  
     
     kprintf("Usable memory : %u bytes\n", available_pages * 4096);
-    LOG("INFO", "Usable memory : %u bytes", available_pages * 4096);  
+    LOG(INFO, "Usable memory : %u bytes", available_pages * 4096);  
 
-    LOG("INFO", "Usable memory layout :");  
+    LOG(INFO, "Usable memory layout :");  
     for (uint16_t i = 0; i < memory_blocks_count; i++)
-        LOG("INFO", "Block : 0x%lx ; %u pages", usable_memory_layout[i].address, usable_memory_layout[i].page_count);  
+        LOG(INFO, "Block : 0x%lx ; %u pages", usable_memory_layout[i].address, usable_memory_layout[i].page_count);  
 
     SetupMemAllocations();
 
@@ -257,14 +257,14 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     // struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
 
-    // LOG("INFO", "A ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
-    // LOG("INFO", "B ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
+    // LOG(DEBUG, "A ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
+    // LOG(DEBUG, "B ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
 
-    // LOG("INFO", "A pde 0 : 0x%x", *(uint32_t*)&taskA.page_directory_ptr[0]);
-    // LOG("INFO", "B pde 0 : 0x%x", *(uint32_t*)&taskB.page_directory_ptr[0]);
+    // LOG(DEBUG, "A pde 0 : 0x%x", *(uint32_t*)&taskA.page_directory_ptr[0]);
+    // LOG(DEBUG, "B pde 0 : 0x%x", *(uint32_t*)&taskB.page_directory_ptr[0]);
 
-    // LOG("INFO", "A pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256]);
-    // LOG("INFO", "B pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256]);
+    // LOG(DEBUG, "A pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256]);
+    // LOG(DEBUG, "B pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256]);
     
     // InitMultitasking(&taskA);
     // AddTask(&taskB);

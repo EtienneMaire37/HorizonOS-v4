@@ -14,7 +14,7 @@ void reset()
 //     Halt();
 
     // ! Triple fault method
-    LOG("WARN", "Rebooting...");
+    LOG(WARNING, "Rebooting...");
 
     _idtr.size = 0;
     LoadIDT();
