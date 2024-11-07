@@ -64,19 +64,13 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
     supported &= header->endianness == ELF32_LITTLE_ENDIAN;
     supported &= header->entry != 0;
 
-    if(!supported) 
-    {
-        LOG(ERROR, "ELF file not supported");
-        kabort();
-    }
-
     LOG(DEBUG, "   Program header : %u entries", header->ph_num);
 
     for (uint16_t i = 0; i < header->ph_num; i++)
     {
         struct ELF32_ProgramHeader_Entry* ph = &((struct ELF32_ProgramHeader_Entry*)&stream[header->ph_off])[i];
 
-        LOG(DEBUG, "       Section : off: 0x%x ; vaddr: 0x%x", ph->seg_off, ph->seg_vaddr);
+        LOG(DEBUG, "       Section : off: 0x%x ; vaddr: 0x%x ; size in file / in memory: %u/%u bytes", ph->seg_off, ph->seg_vaddr, ph->seg_filesz, ph->seg_memsz);
     }
 
     LOG(DEBUG, "   Section header : %u entries", header->sh_num);
@@ -89,8 +83,8 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
 
         if (sh->type != ELF32_SH_TYPE_NULL)
         {
-            LOG(DEBUG, "       Section %s : off: 0x%x ; addr: 0x%x ; allocated : %s", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address, (sh->flags & ELF32_SH_FLAG_ALLOC) != 0 ? "true" : "false");
-            if (sh->flags & ELF32_SH_FLAG_ALLOC)
+            LOG(DEBUG, "       Section %s : off: 0x%x ; addr: 0x%x ; size: %u bytes ; allocated : %s", (char*)&stream[shstrtab->offset + sh->name], sh->offset, sh->address, sh->size, (sh->flags & ELF32_SH_FLAG_ALLOC) != 0 ? "true" : "false");
+            if ((sh->flags & ELF32_SH_FLAG_ALLOC) && supported)
             {
                 if (sh->address & 0xfff)
                 {
@@ -109,6 +103,12 @@ struct Task LoadTaskFromInitrd(char* filename, uint8_t ring, bool system)
                 }
             }
         }
+    }
+    
+    if(!supported) 
+    {
+        LOG(ERROR, "ELF file not supported");
+        kabort();
     }
 
     if (header->entry != 0)

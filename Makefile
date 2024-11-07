@@ -3,7 +3,7 @@ ASM := nasm
 CFLAGS := -std=gnu99 -nostdlib -ffreestanding -Wall -masm=intel -m32 # -O3 -lgcc
 DATE := `date +"%Y-%m-%d"`
 
-all: src/tasks/bin/A.elf src/tasks/bin/B.elf src/tasks/bin/hello_world.elf root/lib/libpdclib.a horizonos.iso
+all: src/tasks/bin/A.elf src/tasks/bin/B.elf horizonos.iso # src/tasks/bin/hello_world.elf root/lib/libpdclib.a 
 
 run: all
 	qemu-system-i386                               		\
@@ -47,19 +47,24 @@ src/tasks/bin/B.elf: Makefile src/tasks/src/B/main.asm src/tasks/src/B/link.ld
 	ld -T src/tasks/src/B/link.ld -m elf_i386 
 	cp src/tasks/bin/B.elf src/initrd/B.elf
 
-src/tasks/bin/hello_world.elf: Makefile root/lib/libpdclib.a
-	$(CC) -c "src/tasks/src/PDCLIB_hw/main.c" \
-	-o "src/tasks/bin/hello_world.elf" \
-	$(CFLAGS) -L"root/lib/" -I"pdclib/include" -I"pdclib/platform/horizonos/include" -lpdclib
-	cp src/tasks/bin/hello_world.elf src/initrd/hello_world.elf
+# src/tasks/bin/hello_world.elf: Makefile root/lib/libpdclib.a root/lib/libpdcglue.a 
+# 	$(CC) -c "src/tasks/src/PDCLIB_hw/main.c" \
+# 	-o "src/tasks/bin/hello_world.o" \
+# 	-L"root/lib/" -I"pdclib/include" -I"pdclib/platform/horizonos/include" \
+# 	-std=gnu99 -nostdlib -Wall -masm=intel -m32
+# 	ld -T src/tasks/src/PDCLIB_hw/link.ld -m elf_i386 
 
-root/lib/libpdclib.a:
-	cd pdclib && cmake . -DUSE_THREADS=OFF -DCMAKE_BUILD_TYPE=Debug
-	cd pdclib && make
+# root/lib/libpdclib.a:
+# 	cd pdclib && cmake . -DUSE_THREADS=OFF -DCMAKE_BUILD_TYPE=Debug
+# 	cd pdclib && make
 
-	mkdir ./root/lib -p
-	cp pdclib/libpdclib.a root/lib/libpdclib.a
-	cp pdclib/libpdclib.so root/lib/libpdclib.so
+# 	mkdir ./root/lib -p
+# 	cp pdclib/libpdclib.a root/lib/libpdclib.a
+# 	cp pdclib/libpdclib.so root/lib/libpdclib.so
+
+# root/lib/libpdcglue.a:
+# 	$(CC) -c -Wall -Werror -fpic src/pdclib/glue.c -o bin/glue.o
+# 	$(CC) -shared -o root/lib/pdcglue.so bin/glue.o
 
 rmBin:
 	rm -rf bin/*

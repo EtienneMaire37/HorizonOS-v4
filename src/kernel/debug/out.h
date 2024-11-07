@@ -25,7 +25,7 @@ char* LOG_LEVEL_STR[5] =
     "INFO",
     "WARN",
     "ERROR",
-    "CRIT"
+    "CRITICAL"
 };
 
 #define _LOG(level_text, ...)           kfprintf(klog, "0000-00-00 \t 00:00:00,000 \t %s \t", level_text); kfprintf(klog, __VA_ARGS__); kfprintf(klog, "\n");

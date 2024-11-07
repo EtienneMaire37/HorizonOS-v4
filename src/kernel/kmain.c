@@ -269,9 +269,11 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     // InitMultitasking(&taskA);
     // AddTask(&taskB);
 
-    struct Task pdclib_hw = LoadTaskFromInitrd("src/initrd/hello_world.elf", 0b00, true);
+    struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true);
+    struct Task taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
     
-    InitMultitasking(&pdclib_hw);
+    InitMultitasking(&taskA);
+    AddTask(&taskB);
     
     EnableMultitasking();
 }
