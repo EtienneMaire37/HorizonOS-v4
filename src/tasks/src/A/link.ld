@@ -10,7 +10,7 @@ OUTPUT("src/tasks/bin/A.elf")
  
 SECTIONS
 {
-	. = 0x100000;
+	. = 0x400000;
 
 	.text :
 	{

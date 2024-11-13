@@ -3,7 +3,7 @@ ASM := nasm
 CFLAGS := -std=gnu99 -nostdlib -ffreestanding -Wall -masm=intel -m32 # -O3 -lgcc
 DATE := `date +"%Y-%m-%d"`
 
-all: src/tasks/bin/A.elf src/tasks/bin/B.elf horizonos.iso # src/tasks/bin/hello_world.elf root/lib/libpdclib.a 
+all: src/tasks/bin/A.elf src/tasks/bin/B.elf horizonos.iso # src/tasks/bin/hello_world.elf root/lib/libpdclib.a
 
 run: all
 	qemu-system-i386                               		\

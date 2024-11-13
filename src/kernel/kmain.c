@@ -218,8 +218,9 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
             struct VirtualAddressLayout layout;
             layout.page_directory_entry = i + 768;
             layout.page_table_entry = j;
+            layout.page_offset = 0;
             uint32_t address = *(uint32_t*)&layout + 0xc0000000;
-            SetPage(&page_table_768_1023[i * 1024], j, (address >> 12), PAGING_SUPERVISOR_LEVEL, true);
+            SetPage(&page_table_768_1023[i * 1024], j, address, PAGING_SUPERVISOR_LEVEL, true);
         }
     }
 
@@ -233,7 +234,7 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
     EnableInterrupts(); 
     LOG(DEBUG, "Enabled interrupts");  
 
-    if(!DetectFirstAvailablePage())
+    if (!DetectFirstAvailablePage())
     {
         LOG(CRITICAL, "Not enough memory to run HorizonOS");
         kabort();
@@ -255,25 +256,25 @@ void kernel(multiboot_info_t* _multibootInfo, uint32_t magicNumber)
 
     Initrd_ListFiles();
 
-    // struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true), taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
-
-    // LOG(DEBUG, "A ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
-    // LOG(DEBUG, "B ring : %u", ((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256].user_supervisor * 3);
-
-    // LOG(DEBUG, "A pde 0 : 0x%x", *(uint32_t*)&taskA.page_directory_ptr[0]);
-    // LOG(DEBUG, "B pde 0 : 0x%x", *(uint32_t*)&taskB.page_directory_ptr[0]);
-
-    // LOG(DEBUG, "A pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[0].address << 12))[256]);
-    // LOG(DEBUG, "B pte 0 : 0x%x", *(uint32_t*)&((struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[0].address << 12))[256]);
-    
-    // InitMultitasking(&taskA);
-    // AddTask(&taskB);
-
     struct Task taskA = LoadTaskFromInitrd("src/initrd/A.elf", 0b00, true);
-    struct Task taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b00, true);
+    struct Task taskB = LoadTaskFromInitrd("src/initrd/B.elf", 0b11, true);
     
     InitMultitasking(&taskA);
     AddTask(&taskB);
+
+    struct PageTable_Entry* APageTable1 = (struct PageTable_Entry*)PhysicalAddressToVirtual(taskA.page_directory_ptr[1].address << 12);
+    struct PageTable_Entry* BPageTable1 = (struct PageTable_Entry*)PhysicalAddressToVirtual(taskB.page_directory_ptr[1].address << 12);
+    
+    LOG(DEBUG, "A pd ring : %u", (taskA.page_directory_ptr[1].user_supervisor * 3));
+    LOG(DEBUG, "A pt ring : %u", (APageTable1[0].user_supervisor * 3));
+    LOG(DEBUG, "B pd ring : %u", (taskB.page_directory_ptr[1].user_supervisor * 3));
+    LOG(DEBUG, "A pt ring : %u", (APageTable1[0].user_supervisor * 3));
+
+    LOG(DEBUG, "A pde 1 : 0x%x", *(uint32_t*)&taskA.page_directory_ptr[1]);
+    LOG(DEBUG, "B pde 1 : 0x%x", *(uint32_t*)&taskB.page_directory_ptr[1]);
+
+    LOG(DEBUG, "A pte 1024 : 0x%x", *(uint32_t*)&APageTable1[0]);
+    LOG(DEBUG, "B pte 1024 : 0x%x", *(uint32_t*)&BPageTable1[0]);
     
     EnableMultitasking();
 }

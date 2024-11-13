@@ -2,8 +2,7 @@
 
 struct Task CreateTask(char* name, virtual_address_t entry, uint8_t ring, bool system)
 {
-    ring = 0b00;    // ! for now because i cant solve a bug with ring 3
-
+    ring = 0b00;    // ! TODO: Change it ASAP
     if (ring != 0b11) ring = 0b00;
 
     struct Task task;
@@ -169,7 +168,7 @@ void TaskSwitch(struct IntRegisters* params)
         // TSS.esp0 = currentTask->registers.esp - sizeof(struct IntRegisters);
         TSS.esp0 = currentTask->registers.currEsp;
 
-        LOG(DEBUG, "Switched to task \"%s\"", currentTask->name);
+        LOG(DEBUG, "Switched to task \"%s\" | Ring %u", currentTask->name, currentTask->flags & TASK_FLAG_RING);
     }
 }
 
@@ -251,7 +250,7 @@ void* CreateNewPage(struct Task* task, uint16_t page_table_index, uint16_t page_
         kabort();
     }
     physical_address_t page_address = AllocatePhysicalPage();
-    // LOG("INFO", "Mapping page at virtual address : 0x%x, to physical address : 0x%lx with ring %u privilege",
+    // LOG(DEBUG, "Mapping page at virtual address : 0x%x, to physical address : 0x%lx with ring %u privilege",
     //     (page_table_index * 4096 + page_index) * 4096, page_address, user_supervisor * 3);
     SetPage(page_table, page_index, page_address, user_supervisor, true);  
     return (struct PageTable_Entry*)PhysicalAddressToVirtual(page_address);

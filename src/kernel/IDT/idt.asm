@@ -97,6 +97,27 @@ _InterruptHandler:
     mov   fs, ax
     mov   gs, ax
 
+    ;
+;     mov [_DS], ax
+
+;     pop eax
+;     mov cr3, eax
+ 
+;     add esp, 4
+
+;     popad
+
+;     mov [TMP], ax
+    
+;     mov ax, [_DS]
+;     mov   ds, ax
+;     mov   es, ax
+;     mov   fs, ax
+;     mov   gs, ax
+
+;     mov ax, [TMP]
+    ;
+
     pop eax
     mov cr3, eax
  
